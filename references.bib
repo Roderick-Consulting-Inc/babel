@@ -1,0 +1,424 @@
+% Babel + Inflexión — shared bibliography
+%
+% License: CC0 1.0 Universal (public-domain dedication).
+% To the extent possible under law, RCI has waived all copyright and related
+% or neighboring rights to this bibliography. Bibliographic facts are facts;
+% reuse without restriction.
+% https://creativecommons.org/publicdomain/zero/1.0/
+%
+% Style: Chicago author-date (CSL: chicago-author-date.csl)
+% Render: pandoc <paper>.md --citeproc --bibliography=references.bib --csl=csl/chicago-author-date.csl
+%
+% Tagging convention (in keywords field):
+%   babel  — used in 04-whitepaper-babel.md
+%   lengua — used in 05-whitepaper-lengua.md
+%   both   — cited in both
+%   shared — also cited in 02-inspiration.md and earlier planning docs
+%
+% All entries marked CONFIRM until verified against primary source.
+% Entries are seeds — extend, do not treat as exhaustive.
+
+@misc{esolangs_wiki,
+  title        = {Esoteric Programming Languages Wiki},
+  author       = {{Esolangs Contributors}},
+  year         = {2026},
+  howpublished = {\url{https://esolangs.org/}},
+  note         = {Accessed 2026-05-08},
+  keywords     = {shared}
+}
+
+@misc{esolangs_bf_derivatives,
+  title        = {Category: Brainfuck derivatives},
+  author       = {{Esolangs Contributors}},
+  year         = {2026},
+  howpublished = {\url{https://esolangs.org/wiki/Category:Brainfuck_derivatives}},
+  note         = {Accessed 2026-05-08; ~800 entries at time of access},
+  keywords     = {babel, shared}
+}
+
+@misc{rodriguez_pueblo_2026,
+  title        = {El Pueblo: Three-Ledger Methodology and the El Mundo Lexicon},
+  author       = {Rodriguez, Ramon},
+  year         = {2026},
+  howpublished = {\url{https://www.roderickc.com/pueblo}},
+  note         = {RCI internal publication; CONFIRM author and date},
+  keywords     = {shared}
+}
+
+@misc{wiki_mierda,
+  title        = {Mierda},
+  author       = {{Esolangs Contributors}},
+  howpublished = {\url{https://esolangs.org/wiki/Mierda}},
+  note         = {Brainfuck derivative with Spanish keyword substitution},
+  keywords     = {lengua, shared}
+}
+
+@misc{wiki_lawea,
+  title        = {La Weá},
+  author       = {{Esolangs Contributors}},
+  howpublished = {\url{https://esolangs.org/wiki/La_We%C3%A1}},
+  note         = {Brainfuck derivative with Chilean Spanish vocabulary; adds clipboard register},
+  keywords     = {lengua, shared}
+}
+
+@misc{wiki_chespirito,
+  title        = {Chespirito},
+  author       = {{Esolangs Contributors}},
+  howpublished = {\url{https://esolangs.org/wiki/Chespirito}},
+  note         = {Brainfuck derivative themed on Roberto Gómez Bolaños catchphrases; adds chiripiolca randomness instruction},
+  keywords     = {lengua, shared}
+}
+
+@inproceedings{conway_perligata_2000,
+  title        = {{Lingua::Romana::Perligata} --- {Perl} for the {XXI-imum} Century},
+  author       = {Conway, Damian},
+  booktitle    = {Proceedings of The Perl Conference 4},
+  year         = {2000},
+  url          = {https://metacpan.org/dist/Lingua-Romana-Perligata},
+  note         = {Latin-grammar Perl module: declension determines variable type (scalar = neuter sg 2nd decl; array = neuter pl 2nd decl; hash = masc pl 4th decl); verb conjugation determines call context; free word order. Predates Wenyan by 19 years; the canonical inflection-as-semantics precedent. Esolang wiki: \url{https://esolangs.org/wiki/Perligata}. CONFIRM exact venue / pages.},
+  keywords     = {lengua, both}
+}
+
+@misc{sarkkinen_tampio,
+  title        = {{Tampio}: A Programming Language Based on Finnish},
+  author       = {Sarkkinen, Iiro},
+  url          = {https://github.com/fergusq/tampio},
+  note         = {Finnish-grammar esolang using the libvoikko Finnish morphological analyzer. Engages 8 noun cases (nom, gen, part, ess, transl, illat, adess, iness/elat), verb conjugation (indicative active/passive, imperatives, participles), 25+ postpositions, comparatives, plural inflection, agreement. Active development; the strongest existing precedent for a living-language grammar-as-semantics esolang. Esolang wiki: \url{https://esolangs.org/wiki/Tampio}. CONFIRM start year (~2017) and current activity.},
+  keywords     = {lengua, both}
+}
+
+@misc{espro_2015,
+  title        = {{Espro}},
+  author       = {{Timwi}},
+  year         = {2015},
+  url          = {https://esolangs.org/wiki/Espro},
+  note         = {Esperanto-grammar esolang concept: accusative -on for fields; accusative adjective -an for types; infinitive -i for methods; -ar- for arrays; ebla for nullable. Idea page only; never implemented. Author known by handle "Timwi"; CONFIRM real identity if available.},
+  keywords     = {lengua}
+}
+
+@misc{huang_wenyan,
+  title        = {{文言} (Wenyan-lang): A Classical Chinese Programming Language},
+  author       = {Huang, Lingdong},
+  year         = {2019},
+  month        = {December},
+  howpublished = {\url{https://wy-lang.org}},
+  note         = {Source repository at \url{https://github.com/wenyan-lang/wenyan}. First release v0.0.1 dated 2019-12-20 (developed during CMU finals week). Compiles to JavaScript, Python, and Ruby. Last release v0.3.4 (2020-07-29); repository quiet since 2023.},
+  keywords     = {lengua, both}
+}
+
+@article{choi_wenyan_2020,
+  title        = {World's First Classical Chinese Programming Language},
+  author       = {Choi, Charles Q.},
+  journal      = {IEEE Spectrum},
+  year         = {2020},
+  month        = {January},
+  day          = {31},
+  url          = {https://spectrum.ieee.org/classical-chinese},
+  note         = {Secondary source on Wenyan; useful for academic citation since no peer-reviewed paper on Wenyan exists},
+  keywords     = {lengua, both}
+}
+
+@misc{attempto_ace,
+  title        = {Attempto Controlled English},
+  author       = {Fuchs, Norbert E. and Kaljurand, Kaarel and Kuhn, Tobias},
+  organization = {University of Zurich},
+  howpublished = {\url{http://attempto.ifi.uzh.ch}},
+  note         = {CONFIRM canonical citation; multiple papers exist (Fuchs et al. 2008 likely best)},
+  keywords     = {lengua}
+}
+
+@misc{nelson_inform7,
+  title        = {Inform 7},
+  author       = {Nelson, Graham},
+  howpublished = {\url{https://ganelson.github.io/inform-website/}},
+  note         = {English-like rule language for interactive fiction; CONFIRM canonical paper or manual citation},
+  keywords     = {lengua}
+}
+
+@misc{mueller_brainfuck_1993,
+  title        = {Brainfuck},
+  author       = {Müller, Urban},
+  year         = {1993},
+  note         = {Original distribution; CONFIRM canonical citation form},
+  keywords     = {babel, shared}
+}
+
+@inproceedings{cheswick_berferd_1992,
+  title        = {An Evening with {Berferd}, in which a Cracker is Lured, Endured, and Studied},
+  author       = {Cheswick, Bill},
+  booktitle    = {Proceedings of the Winter USENIX Conference},
+  address      = {San Francisco},
+  year         = {1992},
+  url          = {https://www.cheswick.com/ches/papers/berferd.pdf},
+  note         = {Reprinted in various venues; canonical literary-technical writing precedent},
+  keywords     = {babel, shared}
+}
+
+@book{raymond_jargon,
+  title        = {The New Hacker's Dictionary},
+  editor       = {Raymond, Eric S.},
+  publisher    = {MIT Press},
+  edition      = {3rd},
+  year         = {1996},
+  note         = {Source Jargon File maintained at \url{http://catb.org/jargon/}; multiple print editions; CONFIRM edition cited for white paper},
+  keywords     = {babel, lengua, shared}
+}
+
+@misc{ioccc,
+  title        = {The International Obfuscated C Code Contest},
+  author       = {{IOCCC Organisers}},
+  year         = {2026},
+  howpublished = {\url{https://www.ioccc.org}},
+  note         = {Running annually since 1984; accessed 2026-05-08},
+  keywords     = {babel, shared}
+}
+
+@misc{obfuscated_perl_contest,
+  title        = {The Obfuscated Perl Contest},
+  organization = {The Perl Journal},
+  note         = {Ran approximately 1996--2000; canonical archive URL to confirm; archived discussion at various community sites},
+  keywords     = {babel, shared}
+}
+
+@book{kidder_soul_1981,
+  title        = {The Soul of a New Machine},
+  author       = {Kidder, Tracy},
+  publisher    = {Little, Brown and Company},
+  address      = {Boston},
+  year         = {1981},
+  note         = {Pulitzer Prize for General Non-Fiction, 1982},
+  keywords     = {babel, lengua, both}
+}
+
+@article{schroeder_saltzer_rings_1972,
+  title        = {A Hardware Architecture for Implementing Protection Rings},
+  author       = {Schroeder, Michael D. and Saltzer, Jerome H.},
+  journal      = {Communications of the ACM},
+  volume       = {15},
+  number       = {3},
+  pages        = {157--170},
+  year         = {1972},
+  month        = {March},
+  note         = {Canonical reference for the Multics protection-ring architecture; CONFIRM page numbers},
+  keywords     = {babel}
+}
+
+% Mushroom theory of information / mushroom management:
+% Folk aphorism, no single canonical source. For white-paper-grade citation,
+% the structural concept (information asymmetry as deliberate organisational
+% feature) should be tied to a real source — possibly Akerlof's "lemons"
+% paper (Akerlof 1970, QJE) at the economic level, or to organisational-
+% theory literature on need-to-know. TO ADD: properly-cited substitute.
+
+% --- LLM prompting / NLP — needed for 05 §5 ---
+% Wei et al. chain-of-thought paper (NeurIPS 2022) — placeholder key
+% [@TODO_wei_chain_of_thought] used in 05; replace with real entry below
+% before publication.
+
+@article{wei_chain_of_thought_2022,
+  title        = {Chain-of-Thought Prompting Elicits Reasoning in Large Language Models},
+  author       = {Wei, Jason and Wang, Xuezhi and Schuurmans, Dale and Bosma, Maarten and Ichter, Brian and Xia, Fei and Chi, Ed H. and Le, Quoc V. and Zhou, Denny},
+  journal      = {Advances in Neural Information Processing Systems},
+  volume       = {35},
+  year         = {2022},
+  note         = {CONFIRM exact volume / pages / arXiv version cited},
+  keywords     = {lengua}
+}
+
+% --- LLM × non-English × code: directly relevant to 05 §5 hypothesis ---
+% Surfaced 2026-05-09 by the novelty-verification research agent.
+
+@inproceedings{peng_humaneval_xl_2024,
+  title        = {{HumanEval-XL}: A Multilingual Code Generation Benchmark for Cross-lingual Natural Language Generalization},
+  author       = {Peng, Qiwei and others},
+  booktitle    = {LREC-COLING},
+  year         = {2024},
+  url          = {https://arxiv.org/abs/2402.16694},
+  note         = {22,080 prompts across 23 natural languages × 12 programming languages. Closest existing study of natural-language-of-prompt effect on code-gen pass@1. Does NOT vary PL surface syntax. CONFIRM author list.},
+  keywords     = {lengua}
+}
+
+@misc{akkasi_codemixbench_2025,
+  title        = {{CodeMixBench}: Code-Mixed Prompts for Code Generation},
+  author       = {Akkasi, Abbas and others},
+  year         = {2025},
+  url          = {https://arxiv.org/html/2505.05063v1},
+  note         = {Hinglish, Spanish-English, Chinese-Pinyin–English code-mixed prompts. Closest existing work touching Spanish + LLM code-gen. CONFIRM author list.},
+  keywords     = {lengua}
+}
+
+@misc{mythbuster_chinese_2026,
+  title        = {Mythbuster: Chinese Language Is Not More Efficient Than English in Vibe Coding},
+  author       = {{Anonymous}},
+  year         = {2026},
+  url          = {https://arxiv.org/html/2604.14210v1},
+  note         = {Directly empirical on the "denser language → cheaper/better LLM coding" claim; finds it does NOT hold once tokenizer effects are controlled. Material counter-evidence for 05 §5; cite explicitly. CONFIRM authorship.},
+  keywords     = {lengua}
+}
+
+@misc{esolang_bench_2026,
+  title        = {{EsoLang-Bench}: Evaluating Code Generation on Esoteric Programming Languages},
+  author       = {{Anonymous}},
+  year         = {2026},
+  url          = {https://arxiv.org/html/2603.09678},
+  note         = {Frontier models drop from ~90\% pass@1 on Python to ~3.8\% on esolangs (Shakespeare, Whitespace, etc.). Critical cautionary cite for any new esolang aimed at LLMs: data-scarcity headwind is large. CONFIRM authorship.},
+  keywords     = {lengua}
+}
+
+@misc{esolangs_seriously_2025,
+  title        = {Let's Take Esoteric Programming Languages Seriously},
+  author       = {{Anonymous}},
+  year         = {2025},
+  url          = {https://arxiv.org/html/2505.15327v2},
+  note         = {Argues for esoteric languages as legitimate evaluation substrate for LLMs. Companion to esolang-bench-2026. CONFIRM authorship.},
+  keywords     = {lengua, babel}
+}
+
+@misc{morphbpe_2025,
+  title        = {{MorphBPE}: Morphology-Aware Subword Tokenization},
+  author       = {{Anonymous}},
+  year         = {2025},
+  url          = {https://arxiv.org/abs/2502.00894},
+  note         = {Synthetic / agglutinative languages tokenize less efficiently under standard BPE; concatenative morphology (English) is BPE's sweet spot. Directly relevant to 05 §5's BPE caveat. CONFIRM authorship; consider also Pimentel et al. arXiv 2410.23656 as alternative.},
+  keywords     = {lengua}
+}
+
+@article{coupe_information_rate_2019,
+  title        = {Different Languages, Similar Encoding Efficiency: Comparable Information Rates Across the Human Communicative Niche},
+  author       = {Coupé, Christophe and Oh, Yoon Mi and Dediu, Dan and Pellegrino, François},
+  journal      = {Science Advances},
+  volume       = {5},
+  number       = {9},
+  year         = {2019},
+  url          = {https://www.science.org/doi/10.1126/sciadv.aaw2594},
+  note         = {Finds total information rate across languages is roughly constant (~39 bits/sec); denser morphology trades off against slower speech rate. Undercuts a naïve "Spanish is denser, therefore richer signal" framing.},
+  keywords     = {lengua}
+}
+
+% --- Self-citation: companion Babel paper — needed for 05 §7 ---
+% Placeholder key [@TODO_self_babel_paper] used in 05;
+% canonical form to be decided once series numbering is fixed.
+
+@unpublished{rodriguez_babel_2026,
+  title        = {Babel: A Methodology for Building Esoteric Programming Languages},
+  subtitle     = {First Installment},
+  author       = {Rodriguez, Ramon},
+  year         = {2026},
+  note         = {RCI publication, first installment of the Babel / Inflexión series; companion to the present paper. Citation form to be finalised at publication of the series.},
+  keywords     = {lengua}
+}
+
+% --- Spanish / Romance grammar reference works ---
+% Used to ground 05 §2 (Why Spanish, and which Spanish), 06 (anticipated objections from
+% computational linguists), and any future installment that engages the Spanish system formally.
+
+@book{butt_benjamin_2018,
+  title        = {A New Reference Grammar of Modern Spanish},
+  author       = {Butt, John and Benjamin, Carmen},
+  edition      = {6th},
+  publisher    = {Routledge},
+  address      = {London},
+  year         = {2018},
+  note         = {Earlier editions published by Hodder Arnold; the 6th edition (Routledge) is the most recent at time of writing. CONFIRM whether a 7th edition has appeared since.},
+  keywords     = {lengua}
+}
+
+@book{rae_ngle_2009,
+  title        = {Nueva gramática de la lengua española},
+  author       = {{Real Academia Española} and {Asociación de Academias de la Lengua Española}},
+  publisher    = {Espasa},
+  address      = {Madrid},
+  year         = {2009--2011},
+  note         = {Published in two stages: Vols. I--II (Morfología y Sintaxis) in 2009; Vol. III (Fonética y Fonología) in 2011. The canonical reference grammar of contemporary Spanish.},
+  keywords     = {lengua}
+}
+
+@book{penny_2002,
+  title        = {A History of the Spanish Language},
+  author       = {Penny, Ralph J.},
+  edition      = {2nd},
+  publisher    = {Cambridge University Press},
+  address      = {Cambridge},
+  year         = {2002},
+  note         = {Standard scholarly history of Spanish from Vulgar Latin onward; useful for grounding claims about which features Spanish kept from Latin and which it added.},
+  keywords     = {lengua}
+}
+
+@book{lipski_1994,
+  title        = {Latin American Spanish},
+  author       = {Lipski, John M.},
+  publisher    = {Longman},
+  address      = {London},
+  year         = {1994},
+  note         = {Canonical reference for regional varieties of Latin American Spanish, including Rioplatense; foundational for any dialect-comparison work.},
+  keywords     = {lengua}
+}
+
+% --- Linguistic typology ---
+% Used to ground 05 §5 (the LLM-prompting-density hypothesis) on the morphological-density
+% claims about Spanish vs. English vs. agglutinative languages.
+
+@book{comrie_aspect_1976,
+  title        = {Aspect: An Introduction to the Study of Verbal Aspect and Related Problems},
+  author       = {Comrie, Bernard},
+  series       = {Cambridge Textbooks in Linguistics},
+  publisher    = {Cambridge University Press},
+  address      = {Cambridge},
+  year         = {1976},
+  note         = {Foundational treatment of grammatical aspect; useful for the 05 §3.3 perfective/imperfective mapping argument.},
+  keywords     = {lengua}
+}
+
+@book{comrie_tense_1985,
+  title        = {Tense},
+  author       = {Comrie, Bernard},
+  series       = {Cambridge Textbooks in Linguistics},
+  publisher    = {Cambridge University Press},
+  address      = {Cambridge},
+  year         = {1985},
+  note         = {Companion to the Aspect volume; treats grammatical tense.},
+  keywords     = {lengua}
+}
+
+@misc{wals_online,
+  title        = {The World Atlas of Language Structures Online ({WALS})},
+  editor       = {Dryer, Matthew S. and Haspelmath, Martin},
+  year         = {2013},
+  publisher    = {Max Planck Institute for Evolutionary Anthropology},
+  address      = {Leipzig},
+  url          = {https://wals.info},
+  note         = {The standard typological database. Useful for any cross-linguistic claim in 05 §5; particularly for the morphological-density positioning of Spanish between analytic and agglutinative languages.},
+  keywords     = {lengua}
+}
+
+@incollection{bickel_nichols_2007,
+  title        = {Inflectional morphology},
+  author       = {Bickel, Balthasar and Nichols, Johanna},
+  editor       = {Shopen, Timothy},
+  booktitle    = {Language Typology and Syntactic Description},
+  edition      = {2nd},
+  volume       = {III: Grammatical Categories and the Lexicon},
+  publisher    = {Cambridge University Press},
+  address      = {Cambridge},
+  year         = {2007},
+  note         = {Survey chapter on inflectional morphology across language types. CONFIRM exact pages and editor-volume detail before publication.},
+  keywords     = {lengua}
+}
+
+% --- Linguistics ---
+% Romance grammar / Spanish reference works
+% TO ADD: Butt and Benjamin, *A New Reference Grammar of Modern Spanish*
+%         Real Academia Española, *Nueva gramática de la lengua española* (NGLE)
+%         Penny, *A History of the Spanish Language*
+%         Comrie, *Aspect* (1976) and *Tense* (1985) for aspect/mood foundations
+%         WALS — World Atlas of Language Structures, for typological density claims
+
+% --- LLM prompting / NLP ---
+% TO ADD: Wei et al., *Chain-of-Thought Prompting* (2022)
+%         Brown et al., *Language Models are Few-Shot Learners* (GPT-3, 2020)
+%         Whatever survives a careful pass on natural-language-density-vs-LLM-precision claims (likely thin)
+
+% --- Singletons cited in 02 by name ---
+% Add as needed when 04/05 cite them: Malbolge (Olmstead), Piet (Morgan-Mar),
+% Shakespeare (Hasselgren and Åslund), Rockstar (Conery), INTERCAL (Woods and Lyon),
+% Vigil, Taxi, Folders, Velato, Beatnik, Chicken, Unary.
