@@ -1,0 +1,59 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Canonical Müller Brainfuck (1993), expressed as a Babel parameter sheet.
+# This is the reference example the runtime is tested against. See
+# §3 and §4 of plans/04-whitepaper-babel.md for the parameter schema.
+
+name: "Brainfuck"
+version: "1.0.0"
+description: >
+  Urban Müller's 1993 esoteric programming language. Eight instructions
+  operating on a one-dimensional unbounded byte tape. The canonical
+  minimal-Turing-complete language and the most widely-derived esolang
+  in the corpus.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: ascii_punctuation
+io: character
+source_extension: ".bf"
+theme: null
+
+instructions:
+  - { token: ">", op: ptr_right,  description: "Move the data pointer one cell to the right." }
+  - { token: "<", op: ptr_left,   description: "Move the data pointer one cell to the left." }
+  - { token: "+", op: increment,  description: "Increment the byte at the data pointer." }
+  - { token: "-", op: decrement,  description: "Decrement the byte at the data pointer." }
+  - { token: ".", op: output,     description: "Output the byte at the data pointer as a character." }
+  - { token: ",", op: input,      description: "Read one byte of input into the cell at the data pointer." }
+  - { token: "[", op: loop_start, description: "If the byte at the data pointer is zero, jump past the matching ]." }
+  - { token: "]", op: loop_end,   description: "If the byte at the data pointer is nonzero, jump back to the matching [." }
+
+additions: []
+removals: []
+
+meta:
+  complexity: medium
+  abstraction: low
+  verbosity: medium
+  playfulness: low
+  unpredictability: zero
+  naturalness: none
+
+examples:
+  - title: "Print the letter A"
+    source: "++++++++[>++++++++<-]>+."
+    expected_output: "A"
+    description: >
+      Sets cell 0 to 8, runs a loop that adds 8 to cell 1 eight times
+      (giving 64), then increments cell 1 to 65 ('A') and prints it.
+
+  - title: "Hello World"
+    source: "++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++."
+    expected_output: "Hello World!\n"
+    description: >
+      The canonical Brainfuck "Hello World" program, attributed to the
+      esolangs.org wiki page on Brainfuck.
