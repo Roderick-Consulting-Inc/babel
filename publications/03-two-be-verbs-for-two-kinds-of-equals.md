@@ -2,6 +2,8 @@
 
 > *Fourth article in an RCI LinkedIn series on the impact of language in technology. The first three were narrative — the personal predecessor ([Listening to Spanish Again](/babel/articles/listening-to-spanish)), the series-aperture observation ([What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry)), the lineage-discovery story ([I Thought I Was the First](/babel/articles/i-thought-i-was-the-first)). This one is the first of the technical articles. First-person voice, but the subject is the language.*
 
+> *Not yet syndicated to LinkedIn.*
+
 There is a trap English speakers learning Spanish fall into within the first month. You want to say *I'm bored*. You reach for the Spanish word for *to be*. The dictionary helpfully gives you two: *ser* and *estar*. You pick one — say, *ser* — and confidently announce *soy aburrido*. The Spanish-speaker you're talking to either suppresses a smile or lets it show.
 
 You did not say *I'm bored*. You said *I am a boring person*.

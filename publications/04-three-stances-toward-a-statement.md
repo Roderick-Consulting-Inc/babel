@@ -2,6 +2,8 @@
 
 > *Fifth article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor ([Listening to Spanish Again](/babel/articles/listening-to-spanish)), the series-aperture observation ([What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry)), the lineage-discovery story ([I Thought I Was the First](/babel/articles/i-thought-i-was-the-first)), and the first technical deep-dive ([Two Be-Verbs for Two Kinds of Equals](/babel/articles/two-be-verbs-for-two-kinds-of-equals)). First-person voice; the second of the technical articles. Subject: mood, the most novel of Inflexión's six grammatical-semantic mappings.*
 
+> *Not yet syndicated to LinkedIn.*
+
 There is a flip in Spanish that English speakers fall into within the second month, after they have already learned the *ser*/*estar* trap from the first month. It is the indicative-versus-subjunctive flip on negation.
 
 You want to say *I think he's coming tomorrow*. You confidently produce *Creo que viene mañana*. The Spanish-speaker nods. You then want to say *I don't think he's coming tomorrow*. You confidently produce *No creo que viene mañana* — and the Spanish-speaker either smiles or corrects you. You did not say *I don't think he's coming*. You said something the language registers as ill-formed.

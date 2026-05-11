@@ -2,6 +2,8 @@
 
 > *Third article in an RCI LinkedIn series on the impact of language in technology. Builds on [Listening to Spanish Again](/babel/articles/listening-to-spanish) and [What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry). First-person voice. Story-form, not a technical deep-dive.*
 
+> *Not yet syndicated to LinkedIn.*
+
 The two previous articles were the *why* and the *general claim*. This one is the *embarrassment* — and the methodological move that turned out to be more interesting than the embarrassment.
 
 When I started working on Inflexión — a programming language whose semantics flow from the grammatical features of Rioplatense Spanish — I was confident about the novelty claim. *No esoteric programming language exists*, the early draft of the formal paper said, *that uses the grammar of a living non-English language as the source of programming semantics.* I knew about Wenyan — the Classical-Chinese-grammar language Lingdong Huang shipped in 2019 — and I treated it as the closest precedent. Wenyan engages a literary register; Inflexión engages a living one. *Inflexión opens an empty lane.*

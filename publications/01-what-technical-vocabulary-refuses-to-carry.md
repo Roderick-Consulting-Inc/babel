@@ -2,6 +2,8 @@
 
 > *Second article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor [Listening to Spanish Again](/babel/articles/listening-to-spanish). First-person voice; focused on Babel and Inflexión rather than a sweeping multi-thread research programme.*
 
+> *Not yet syndicated to LinkedIn.*
+
 The first time I noticed it was in Spanish, talking about Microsoft Mesh covering a *quilombo* — a story I told in the previous article. But once you start hearing it, you start hearing it in English too. Probably in every other natural language a careful speaker pays attention to, though I'm not going to make claims about languages I don't know well.
 
 Technical vocabulary is doing a different job from natural-language vocabulary — *it is not supposed to carry the weight*. That is the whole point. But the weight, when you look for it, is everywhere. And the stripping-down is not free.

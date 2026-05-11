@@ -2,6 +2,8 @@
 
 > *Seventh article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor ([Listening to Spanish Again](/babel/articles/listening-to-spanish)), the series-aperture observation ([What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry)), the lineage-discovery story ([I Thought I Was the First](/babel/articles/i-thought-i-was-the-first)), and the three technical deep-dives so far ([Two Be-Verbs for Two Kinds of Equals](/babel/articles/two-be-verbs-for-two-kinds-of-equals) on ser/estar, [Three Stances Toward a Statement](/babel/articles/three-stances-toward-a-statement) on mood, [One Verb, Two Computations](/babel/articles/one-verb-two-computations) on aspect). First-person voice; the fourth of the technical articles. Subject: clitics, the most syntactically novel of Inflexión's six grammatical-semantic mappings.*
 
+> *Not yet syndicated to LinkedIn.*
+
 *Dámelo.*
 
 That is one word in Spanish. The translation is four words in English: *give it to me*. The four English words can be reordered in conversational ways (*give me it* — a little awkward but legal; *to me, give it* — poetic, almost ungrammatical). The Spanish word cannot be reordered in any conversational way. *Lome dá* and *medálo* and *lomedá* are not Spanish; they are typing errors.

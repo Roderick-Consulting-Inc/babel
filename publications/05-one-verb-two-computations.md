@@ -2,6 +2,8 @@
 
 > *Sixth article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor ([Listening to Spanish Again](/babel/articles/listening-to-spanish)), the series-aperture observation ([What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry)), the lineage-discovery story ([I Thought I Was the First](/babel/articles/i-thought-i-was-the-first)), and the first two technical deep-dives ([Two Be-Verbs for Two Kinds of Equals](/babel/articles/two-be-verbs-for-two-kinds-of-equals) on ser/estar, [Three Stances Toward a Statement](/babel/articles/three-stances-toward-a-statement) on mood). First-person voice; the third of the technical articles. Subject: aspect, the smallest of Inflexión's six grammatical-semantic mappings.*
 
+> *Not yet syndicated to LinkedIn.*
+
 *Cuando llegué, mi madre cocinaba.*
 
 When I arrived, my mother was cooking.

@@ -2,6 +2,8 @@
 
 > *First article in an RCI LinkedIn series on the impact of language in technology. Predecessor to the formal Babel and Inflexión installments. First-person voice, deliberately — the formal papers are written in third-person essayistic register; this series is written in the *I* of someone who experienced something.*
 
+> *Published on LinkedIn 2026-05-11 — <https://www.linkedin.com/feed/update/urn:li:ugcPost:7459586455376568320/>.*
+
 A customer was talking, in Spanish, about using Microsoft Mesh to build their data pipelines. I heard *Mesh* the way you hear a foreign technical term you've slowly become familiar with — and at the same time, half-translated in the back of my head, I heard *malla* (what Spanish would call a mesh) and *velo* (a veil — which a mesh kind of *is*, a covering you can see through). What they were covering, with all this careful technical vocabulary, was a *quilombo*.
 
 *Quilombo* is a Rioplatense word. Its roots are in the Bantu languages of enslaved West Africans brought to colonial Brazil — a *quilombo* was a settlement of escaped slaves, the most famous being the Quilombo dos Palmares. The word migrated through the centuries into Argentine and Uruguayan slang, where it now means a chaotic mess, a complete disaster. The customer, of course, didn't say *quilombo*. They said *Microsoft Mesh*. But what was being covered, by the technical mesh-as-veil, was unambiguously a *quilombo*. The Spanish word would have named the underlying state of the data architecture more precisely than any phrase in the entire technical conversation. And nobody said it.
@@ -10,7 +12,7 @@ A customer was talking, in Spanish, about using Microsoft Mesh to build their da
 
 I should not have noticed any of this. I grew up speaking Venezuelan Spanish — first language, household language, the language I dreamed in until I was twenty-something. Then twenty years of mostly-English professional life happened, and Spanish quietly receded. Not catastrophically, the way a forgotten skill recedes; more like a room you stopped going into. The furniture was still there.
 
-A few years ago I came back to live not in my native Venezuela but in Argentina. The Spanish I was returning to was *not the Spanish I had grown up with*. It was Rioplatense — Argentine Spanish, with *vos* instead of *tú*, with the Italian-inflected intonation of Buenos Aires, with *lunfardo* lexicon I'd never heard, with the cultural texture of a country I knew abstractly but didn't *speak from*. I was recovering and adopting, at the same time. *Relearning my native language as a different language.*
+A few years ago I came back to full immersion in a Spanish culture, although not in my native Venezuela but in Argentina. The Spanish I was returning to was *not the Spanish I had grown up with*. It was Rioplatense — Argentine Spanish, with *vos* instead of *tú*, with the Italian-inflected intonation of Buenos Aires, with *lunfardo* lexicon I had heard but not listened to, with the cultural texture of a country I knew abstractly but didn't *speak from*. I was recovering and adopting, at the same time. *Relearning my native language as a different language.*
 
 This double move turns out to be the position from which conscious noticing becomes possible. A Venezuelan who never left wouldn't notice *quilombo*'s historical weight; they'd just use the word. An English-speaker learning Spanish from scratch would notice it but as foreign vocabulary. I'm in the middle, where the morphology is half-recognised and half-new. The textbook is invisible; the patterns are not.
 
@@ -20,7 +22,7 @@ What you start to notice, in this position, is that words *do not stop carrying 
 
 A few more examples from what I've been re-learning:
 
-*Garpar* is the *vesre* — the syllable-reversal — of *pagar*, *to pay*. A Buenos Aires word-game culture flips syllables to make new words: *café* becomes *feca*, *tango* becomes *gotán*, *pagar* becomes *garpar*. *Garpar la nube* — to pay the cloud bill — has a register English's *spend* and *pay* don't have. The word carries the practice of vesre itself, the act of being from somewhere where you do this with words.
+*Garpar* is the *vesre* — the syllable-reversal — of *pagar*, *to pay*. A Buenos Aires word-game culture flips syllables to make new words: *café* becomes *feca*, *tango* becomes *gotán*, *pagar* becomes *garpar*. *Garpar la nube* — to pay the cloud bill — has a register English's *spend* and *pay* don't have. The word carries a sense of *expensive*, a heavy lift.
 
 *Posta* started as a stagecoach relay station — the place information arrived in the colonial-era postal system. Through the centuries, the word *sublimated* from infrastructure to abstraction. *¿posta?* doesn't ask for a place; it asks for the truth. *Es posta* — it's a fact. The word's modern meaning is what was once carried *by* postas: information, certainty, news.
 
@@ -38,7 +40,9 @@ What if a programming language were deliberately built around a substrate langua
 
 That hypothesis is now a research project. Two of them, actually.
 
-The first, **Babel**, is a methodology for building esoteric programming languages programmatically: a parameter schema for the variation axes the field has implicitly used for thirty years, and a runtime that turns parameter sheets into working artifacts (interpreter, transpiler, specification page). The second, **Inflexión**, is a hand-built Spanish-grammar esoteric language that makes the *ser* / *estar*, mood-as-evaluation, aspect-as-eager-or-lazy, clitic-as-argument-routing, diminutive-as-scaling moves I just sketched into actual programming-language semantics.
+The first, **Babel**, is a methodology for building esoteric programming languages programmatically: a parameter schema for the variation axes the field has implicitly used for thirty years, and a runtime that turns parameter sheets into working artifacts (interpreter, transpiler, specification page).
+
+The second, **Inflexión**, is a hand-built Spanish-grammar esoteric language that makes the *ser* / *estar*, mood-as-evaluation, aspect-as-eager-or-lazy, clitic-as-argument-routing, diminutive-as-scaling moves I just sketched into actual programming-language semantics.
 
 There is prior art in this lane. *Lingua::Romana::Perligata* did it for Latin in 2000 (Damian Conway). *Wenyan-lang* did it for Classical Chinese in 2019 (Lingdong Huang). *Tampio* has been doing it for Finnish since around 2017 (Iiro Sarkkinen). The lane is not empty; Inflexión is the first to take a *living Romance language* and make this specific feature set load-bearing. I've also done one prior, less formal version of the move in *El Pueblo* — the Rioplatense word *posta* is the chosen technical name for a sensor-relay node in an RCI architecture. The natural-language version of the observation predated the formal computational version by some time.
 
