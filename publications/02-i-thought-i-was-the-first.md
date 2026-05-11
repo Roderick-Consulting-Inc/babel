@@ -28,7 +28,7 @@ I had not heard of Perligata. The canonical inflection-as-semantics precedent fo
 
 ## Tampio, ~2017
 
-**Iiro Sarkkinen**, posting as *fergusq*, has been developing **Tampio** since around 2017. Tampio uses Finnish — a *living* agglutinative language with eight noun cases, verb conjugation across active and passive voice, imperatives and participles, more than twenty-five postpositions, plural inflection, agreement. It uses the libvoikko Finnish morphological analyzer to do the parsing. The Tampio compiler is small, well-engineered, and hobbyist-grade in the best sense — a single author, a clear design, a working artifact, an esolangs.org wiki entry, an active GitHub repository.
+**Iikka Hauhio**, posting as *fergusq*, has been developing **Tampio** since around 2017. Tampio uses Finnish — a *living* agglutinative language with eight noun cases, verb conjugation across active and passive voice, imperatives and participles, more than twenty-five postpositions, plural inflection, agreement. It uses the libvoikko Finnish morphological analyzer to do the parsing. The Tampio compiler is small, well-engineered, and hobbyist-grade in the best sense — a single author, a clear design, a working artifact, an esolangs.org wiki entry, an active GitHub repository.
 
 Tampio is the precedent that should embarrass me most. *Living non-English natural language, grammar-as-semantics, single hobbyist author, esolangs.org-cataloged* — Tampio is the precedent that does *exactly* what Inflexión proposes to do, except for Finnish instead of Spanish. The "first esolang to use a living non-English natural-language grammar" claim collapses on contact with Tampio.
 
@@ -48,7 +48,7 @@ The corrected claim is more defensible than the one I started with, and probably
 
 Honest preparation works. Writing down the novelty claim and looking for the precedents that would falsify it surfaced four authors who deserved credit, gave the formal paper a more accurate framing, and turned what would have been a post-publication embarrassment into a pre-publication clarification. The piece worth taking forward is not the embarrassment; it is the practice.
 
-The formal paper now opens a section on the lineage rather than a section claiming to open an empty lane. The acknowledgements thank Damian Conway, Lingdong Huang, and Iiro Sarkkinen by name, alongside the existing thanks to the esolangs.org maintainers. Inflexión joins a genre rather than starts one — and a genre with company is a more interesting place to be than a lane with one occupant.
+The formal paper now opens a section on the lineage rather than a section claiming to open an empty lane. The acknowledgements thank Damian Conway, Lingdong Huang, and Iikka Hauhio by name, alongside the existing thanks to the esolangs.org maintainers. Inflexión joins a genre rather than starts one — and a genre with company is a more interesting place to be than a lane with one occupant.
 
 ---
 
