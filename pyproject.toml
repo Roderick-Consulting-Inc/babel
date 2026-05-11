@@ -32,7 +32,7 @@ dev = [
 ]
 
 [project.scripts]
-babel = "babel.cli:main"
+babel = "babel.__main__:main"
 
 [project.urls]
 Homepage = "https://www.roderickc.com/babel"

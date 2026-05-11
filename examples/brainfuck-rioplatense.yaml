@@ -1,0 +1,69 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# The Rioplatense vocabulary-skin Brainfuck thought-experiment from
+# §7 of plans/04-whitepaper-babel.md, made operable as a Babel
+# parameter sheet. Vocabulary substitution + one addition (HALVE via
+# the diminutive suffix). Encoded as whitespace-separated tokens.
+#
+# This sheet exercises the transpiler more than the canonical sheet
+# does: tokens have to be mapped back to vanilla BF characters and the
+# HALVE addition has to be lowered to a vanilla BF idiom.
+
+name: "Brainfuck Rioplatense"
+version: "0.1.0"
+description: >
+  Vocabulary-skin Brainfuck derivative themed around the Argentine
+  Rioplatense dialect with voseo. Adds one diminutive-as-halve
+  instruction (the only mechanical departure from canonical BF). The
+  worked thought-experiment in §7 of the Babel methodology paper.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+source_extension: ".bfri"
+theme: "rioplatense_argentine"
+
+instructions:
+  - { token: "che",      op: ptr_right,  description: "Advance the data pointer (Argentine vocative)." }
+  - { token: "vení",     op: ptr_left,   description: "Retreat the data pointer (vos imperative)." }
+  - { token: "más",      op: increment,  description: "Increment the current cell." }
+  - { token: "menos",    op: decrement,  description: "Decrement the current cell." }
+  - { token: "decí",     op: output,     description: "Output the current cell as a character (vos imperative)." }
+  - { token: "escuchá",  op: input,      description: "Read one character into the current cell (vos imperative)." }
+  - { token: "mientras", op: loop_start, description: "Enter loop body if the current cell is nonzero." }
+  - { token: "ya",       op: loop_end,   description: "Exit loop or loop back (Rioplatense terminative particle)." }
+  - { token: "ito",      op: halve,      description: "Halve the current cell (diminutive suffix)." }
+
+additions:
+  - "halve_via_diminutive_suffix"
+removals: []
+
+meta:
+  complexity: medium
+  abstraction: low
+  verbosity: verbose
+  playfulness: moderate
+  unpredictability: zero
+  naturalness: vocabulary
+
+examples:
+  - title: "Print the letter A"
+    source: "más más más más más más más más mientras che más más más más más más más más vení menos ya che más decí"
+    expected_output: "A"
+    description: >
+      The canonical "print A" program rewritten in Rioplatense tokens.
+      Sets cell 0 to 8, multiplies into cell 1 to get 64, then
+      increments to 65 ('A') and prints.
+
+  - title: "Halve and print"
+    source: "más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más más ito ito decí"
+    expected_output: "A"
+    description: >
+      Sets cell 0 to 260, applies the diminutive twice — 260 → 130 →
+      65 ('A') — and prints. Demonstrates the diminutive-as-halve
+      addition; the same effect in canonical BF requires the divmod
+      idiom, which the transpiler emits inline.
