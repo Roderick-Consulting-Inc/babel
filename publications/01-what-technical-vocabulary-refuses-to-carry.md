@@ -1,6 +1,6 @@
 # What Technical Vocabulary Refuses to Carry
 
-> *Draft 2, 2026-05-09. Second article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor [Listening to Spanish Again](00-listening-to-spanish.md). First-person voice; focused on Babel and Inflexión rather than a sweeping multi-thread research programme.*
+> *Second article in an RCI LinkedIn series on the impact of language in technology. Builds on the predecessor [Listening to Spanish Again](/babel/articles/listening-to-spanish). First-person voice; focused on Babel and Inflexión rather than a sweeping multi-thread research programme.*
 
 The first time I noticed it was in Spanish, talking about Microsoft Mesh covering a *quilombo* — a story I told in the previous article. But once you start hearing it, you start hearing it in English too. Probably in every other natural language a careful speaker pays attention to, though I'm not going to make claims about languages I don't know well.
 

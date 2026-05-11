@@ -1,6 +1,6 @@
 # I Thought I Was the First. I Was the Fifth.
 
-> *Draft 1, 2026-05-10. Third article in an RCI LinkedIn series on the impact of language in technology. Builds on [Listening to Spanish Again](00-listening-to-spanish.md) and [What Technical Vocabulary Refuses to Carry](01-what-technical-vocabulary-refuses-to-carry.md). First-person voice. Story-form, not a technical deep-dive.*
+> *Third article in an RCI LinkedIn series on the impact of language in technology. Builds on [Listening to Spanish Again](/babel/articles/listening-to-spanish) and [What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry). First-person voice. Story-form, not a technical deep-dive.*
 
 The two previous articles were the *why* and the *general claim*. This one is the *embarrassment* — and the methodological move that turned out to be more interesting than the embarrassment.
 
@@ -40,7 +40,7 @@ This was the one I knew about. The other three I did not.
 
 The honest reframe: Inflexión is not the first inflection-driven natural-language esoteric programming language. It is **the fifth in a small lineage** — Perligata (Latin, 2000), Espro (Esperanto, 2015, idea-only), Tampio (Finnish, ~2017–present), Wenyan (Classical Chinese, 2019), Inflexión (Rioplatense Spanish, 2026). The lineage is small but real. Each member engages a different language family — Italic, constructed, Uralic, Sino-Tibetan, Romance. None engages the specific feature set Inflexión makes load-bearing: the *ser* / *estar* copular split, the indicative-subjunctive-imperative mood three-way, the perfective-imperfective aspect contrast, Spanish clitic ordering, productive diminutive and augmentative morphology. Inflexión's contribution is now, more carefully, *the first Romance-language entry, and the first to engage that specific Spanish feature set jointly*.
 
-This is a more defensible claim than the one I started with. It is also a more interesting one. The original claim — *first ever* — would have been embarrassing under any careful reading and would have collapsed at the first review. The corrected claim — *fifth in a small lineage, distinctive in these specific ways* — is precise enough to defend, modest enough to be believed, and generous enough to credit the four authors who arrived first.
+The corrected claim is more defensible than the one I started with, and probably more interesting too. *Fifth in a small lineage, distinctive in these specific ways* — that I can argue for. *First ever* was something I'd have had to walk back the moment a careful reader showed up. Better to walk it back now, and to credit the four authors who arrived first.
 
 ## The piece worth taking forward
 

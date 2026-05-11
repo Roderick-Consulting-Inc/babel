@@ -116,7 +116,9 @@ The dialect-specific lane is open beyond La Weá's Chilean register. Rioplatense
 
 ## Inflection-driven non-English natural-language esolangs
 
-> **[Diagram pending — render service down]** *A horizontal timeline of the lineage discussed in this section: Perligata (Latin, 2000), Espro (Esperanto, 2015, idea-only), Tampio (Finnish, ~2017), Wenyan (Classical Chinese, 2019), Inflexión (Rioplatense Spanish, 2026). Mermaid source at [`/data/rci/Babel/diagrams/lineage-timeline.mmd`](../diagrams/lineage-timeline.mmd). Will render at `https://diagrams.roderickc.com/api/v1/apps/www/diagrams/inflexion-lineage.svg` once the diagrams service's render pipeline is back (see knowledge-base entry on the 2026-05-09 render failure).*
+![Inflection-driven non-English natural-language esolangs — horizontal timeline placing Perligata (Latin, 2000), Espro (Esperanto, 2015, idea-only), Tampio (Finnish, ~2017), Wenyan (Classical Chinese, 2019), and Inflexión (Rioplatense Spanish, 2026) along a single axis.](https://diagrams.roderickc.com/api/v1/apps/www/diagrams/inflexion-lineage.svg)
+
+*Mermaid source: [`/data/rci/Babel/diagrams/lineage-timeline.mmd`](../diagrams/lineage-timeline.mmd).*
 
 A small but real genre: esoteric programming languages that engage the *grammar* (not just the vocabulary) of a non-English natural language as syntactic structure or semantic substrate. We have found four members of this genre, and Inflexión joins them as the fifth.
 

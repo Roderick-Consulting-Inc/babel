@@ -1,6 +1,6 @@
 # Listening to Spanish Again
 
-> *Draft 1, 2026-05-09. First article in an RCI LinkedIn series on the impact of language in technology. Predecessor to the formal Babel and Inflexión installments. First-person voice, deliberately — the formal papers are written in third-person essayistic register; this series is written in the *I* of someone who experienced something.*
+> *First article in an RCI LinkedIn series on the impact of language in technology. Predecessor to the formal Babel and Inflexión installments. First-person voice, deliberately — the formal papers are written in third-person essayistic register; this series is written in the *I* of someone who experienced something.*
 
 A customer was talking, in Spanish, about using Microsoft Mesh to build their data pipelines. I heard *Mesh* the way you hear a foreign technical term you've slowly become familiar with — and at the same time, half-translated in the back of my head, I heard *malla* (what Spanish would call a mesh) and *velo* (a veil — which a mesh kind of *is*, a covering you can see through). What they were covering, with all this careful technical vocabulary, was a *quilombo*.
 
