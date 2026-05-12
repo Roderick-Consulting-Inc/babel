@@ -6,32 +6,32 @@
 flowchart LR
     subgraph SP["Spanish grammar"]
         direction TB
-        N["<b>Number</b><br/>singular / plural<br/>(agreement enforced)"]
+        S["<b>Ser / Estar</b><br/>two copular verbs"]
         M["<b>Mood</b><br/>indicative / subjunctive / imperative"]
         A["<b>Aspect</b><br/>perfective / imperfective"]
-        S["<b>Ser / Estar</b><br/>two copular verbs"]
         C["<b>Clitic ordering</b><br/>se · te · me · lo · le"]
         D["<b>Diminutive / Augmentative</b><br/>-ito · -illo · -ón · -azo"]
+        N["<b>Number</b><br/>singular / plural<br/>(agreement enforced)"]
     end
 
     subgraph PS["Programming semantic"]
         direction TB
-        N1["Scalar / Collection<br/>(APL-style broadcast)"]
+        S1["Immutable / Mutable<br/>(binding kind)"]
         M1["Eager / Deferred / Effect<br/>(evaluation strategy)"]
         A1["Eager / Lazy<br/>(call-by-value vs. streaming)"]
-        S1["Immutable / Mutable<br/>(binding kind)"]
         C1["Argument routing<br/>(positional, fixed-order)"]
         D1["Numeric scaling<br/>+ function-cost annotation"]
+        N1["Scalar / Collection<br/>(APL-style broadcast)"]
     end
 
-    N --> N1
+    S --> S1
     M --> M1
     A --> A1
-    S --> S1
     C --> C1
     D --> D1
+    N --> N1
 
     classDef spanish fill:#fef3c7,stroke:#b45309,color:#78350f
     classDef semantic fill:#dbeafe,stroke:#1e40af,color:#1e3a8a
-    class N,M,A,S,C,D spanish
-    class N1,M1,A1,S1,C1,D1 semantic
+    class S,M,A,C,D,N spanish
+    class S1,M1,A1,C1,D1,N1 semantic
