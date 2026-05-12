@@ -2,7 +2,7 @@
 
 > *Third article in an RCI LinkedIn series on the impact of language in technology. Builds on [Listening to Spanish Again](/babel/articles/listening-to-spanish) and [What Technical Vocabulary Refuses to Carry](/babel/articles/what-technical-vocabulary-refuses-to-carry). First-person voice. Story-form, not a technical deep-dive.*
 
-> *Not yet syndicated to LinkedIn.*
+> *Published on LinkedIn 2026-05-12 — <https://www.linkedin.com/feed/update/urn:li:ugcPost:7459987057960984576/>.*
 
 The two previous articles were the *why* and the *general claim*. This one is the *embarrassment* — and the methodological move that turned out to be more interesting than the embarrassment.
 
