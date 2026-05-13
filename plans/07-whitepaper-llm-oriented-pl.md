@@ -160,4 +160,61 @@ The empirical work is itself part of the contribution. Existing LLM-oriented PL 
 
 The cascade also produces the answer to the gating question of §1. If the Stage 1–3 measurements show that Python plus SimPy (or any other existing combination) dominates the Pareto frontier on the stakeholder profile chosen, the right outcome is to publish this methodology paper as the contribution and *not* build the language proposed for Installment 08. The null result is real, and the discipline of sequencing the cheap measurements first lets the null result be reached without the wasted effort of building a language whose value the empirical work would have negated.
 
-— *Draft 1, 2026-05-13. §8–§10 still to draft. Citation density and section length will tune in revision; the LMPL 2026 call invites both research papers (12 pages) and position papers (6 pages); current trajectory is between the two and may shorten in revision.*
+## 8. The four-way verbosity stratification
+
+The methodology in §6 proposes that *verbosity*, treated by the original Babel schema [@rodriguez_babel_2026 §4] as a single meta-parameter measuring "bytes per logical operation," is no longer doing the work the LLM-oriented field needs from it. This chapter argues why, presents an empirical measurement of the alternative, and offers our own theory of what the alternative buys us — leaving the question of whether the buy is worth the complication honestly open.
+
+### 8.1 Why a single number stopped being enough
+
+Babel's original verbosity parameter was calibrated against the eight hundred Brainfuck derivatives. In that corpus, the cost a language imposes is uniform: every token is a character is a byte is, roughly, a unit of cognitive load. Chicken (one token, repetition-encoded) is hyper-verbose; J or K (single-byte tokens) are hyper-compact. One number suffices because the relevant cost axes correlate: a Chicken program is long in characters, long in bytes, long in keystrokes, and long in cognitive load. The correlations let a designer move along a single dimension by a single decision.
+
+The 2024–2026 LLM-oriented field has stratified the relevant cost axes into four separable measures, each with its own units, its own consumer, and its own design implications:
+
+- **Bytes per op** — the cost of storing or transmitting the source. Relevant to the file-system stakeholder; to version-control diff size; to network transmission of LLM prompts (the bytes wire-formatted in a JSON request body, before tokenization).
+- **Characters per op** — the cost of reading the source for a human. Roughly correlated with bytes per op for English-keyworded languages, but diverges when the language uses multi-byte UTF-8 (Wenyan, Inflexión with its accented characters and clitics).
+- **Morphemes per op** — the cost of cognitive processing for a linguistically-aware reader, and a proxy for the semantic density of the surface form. A morphologically rich language (Spanish, Finnish, Classical Chinese) packs more semantic distinctions per morpheme than an analytic language (Python, English keyworded PLs).
+- **Tokens per op** — the cost the LLM pays per semantic operation, against a chosen tokenizer. *Different from any of the above*: BPE was trained on the analytic-language frequencies of its training data and partitions morphologically-rich text in ways that respect neither character boundaries nor morpheme boundaries.
+
+In the original Brainfuck-derivative corpus, these four measures correlate so tightly that a single number is adequate. In the LLM-oriented field they do not. The Sun et al. SimPy result [@sun_simpy_2024] is a useful illustration: stripping Python's formatting reduces bytes, characters, and tokens roughly in proportion, but leaves morphemes-per-op almost unchanged (Python's grammar was analytic before the strip and is analytic after). The result is consistent across the four measures only because SimPy operates on an analytic-language base. A language with a morphologically-rich substrate may decorrelate the four in non-obvious ways. The empirical measurement in §8.2 shows that this is exactly what Inflexión does.
+
+### 8.2 Empirical measurement
+
+A small-but-controlled experiment, sequenced as Stage 1 of the empirical cascade in §7, measures the four strata across five short programs in three forms (Python, SimPy-style hand-stripped Python, Inflexión as defined in [@rodriguez_inflexion_2026 §5]) against six tokenizers (tiktoken's `cl100k_base` and `o200k_base`; Hugging Face mirrors of Llama-3, Qwen-2.5, Mistral-7B; GPT-2 for historical comparison). The dataset is reproducible from the empirical step-one report [@empirical_step1_extended_2026]. Aggregate ratios versus the Python baseline:
+
+| Stratum | SimPy-style | Inflexión |
+|---------|-------------|-----------|
+| bytes per op | −52.1% | −1.8% |
+| characters per op | −52.1% | −3.4% |
+| morphemes per op | −36.2% | **+359.9%** |
+| tokens per op (cl100k_base) | −38.3% | **+15.2%** |
+| tokens per op (o200k_base) | −42.4% | +17.6% |
+| tokens per op (Llama-3) | −41.0% | +18.4% |
+| tokens per op (Qwen-2.5) | −44.6% | +20.3% |
+| tokens per op (Mistral) | −46.3% | +19.7% |
+| tokens per op (GPT-2) | −38.3% | −5.4% |
+
+Two observations the table is designed to make immediately legible.
+
+First, **SimPy's four measures move together**. Bytes, characters, morphemes, and tokens all drop by between 36% and 52%; the relative magnitudes vary slightly but the direction is uniform across all four. A reader can summarise SimPy's verbosity profile with a single number ("roughly half") without losing much. The original Babel `verbosity` parameter would have described SimPy adequately. The four-way stratification, for SimPy, is overkill.
+
+Second, **Inflexión's four measures do not move together**. Bytes per op is essentially unchanged from Python (−1.8%). Characters per op is essentially unchanged (−3.4%). Morphemes per op is *quadruple* Python's (+359.9%) — the morphological density that Inflexión's grammatical-semantic mappings make load-bearing shows up directly as morphemes packed into each operation. Tokens per op is *higher* than Python on every modern tokenizer (+15% to +20%) and only ties Python on GPT-2 (which was trained before LLM-oriented PL design was a research topic). A reader summarising Inflexión's verbosity with one number gets a different answer depending on which of the four strata they reach for. The four-way stratification, for Inflexión, is doing real descriptive work that the original single parameter would collapse.
+
+The same empirical run, restated per program rather than per op, recovers the earlier Stage-1 finding: Inflexión averages **−28% tokens versus Python** when totals are taken over a whole program. This reconciles with the +15–20% per-op finding through a single mechanism: Inflexión uses fewer ops per program than Python does, because each op packs more semantic distinctions into morphology. The per-op token cost is higher; the per-program token cost is lower; the morpheme density is what carries the trade. Both numbers are correct; they describe different normalizations of the same underlying surface. A designer or a reader who treats verbosity as one-dimensional cannot see this trade.
+
+### 8.3 Our theory of the contribution
+
+We offer, hedged as a theory rather than a finding, the following account of what the four-way stratification gives the field:
+
+**A single verbosity parameter implicitly assumes the four measures correlate.** When they do (SimPy, Token Sugar [@sun_token_sugar_2025], ShortCoder [@liu_shortcoder_2026], the analytic-language-base interventions that dominate the 2024–2026 field), the assumption is harmless and the parameter is adequate. When they do not (Inflexión, Tampio, Wenyan, Perligata, and presumably any future LLM-oriented design that engages a morphologically-rich substrate), the single parameter forces the designer to pick which measure to optimise *without realising the choice has been made implicitly*. The four-way stratification raises the choice to the surface: a designer choosing "low verbosity" must now say *low on which stratum* — and discover, by saying it, that the strata can be traded against each other.
+
+**The trade is real and the field has been treating it as theoretical.** Sun et al.'s SimPy paper [@sun_simpy_2024] argues that natural-language-style verbosity is wasteful for LLMs. Youvan's Tokenese paper [@youvan_tokenese_2025] argues that natural languages are tokenization-inefficient and a constructed alternative would be better. Both arguments are correct on the *per-op tokens* stratum. Inflexión's per-program win is correct on the *per-program tokens* stratum. The arguments do not conflict; they describe different points on different strata. The field has been arguing past itself for two years because the underlying measure was undecomposed.
+
+**The contribution of the four-way stratification is therefore that it makes the design trade explicit.** A new LLM-oriented language can now publish four numbers and be reviewable on all of them. A reader can ask: "What is the per-op morpheme count this language commits to, and what does it cost per-op in tokens?" rather than "Is this language verbose?" The first question is answerable; the second was always a category mistake.
+
+### 8.4 Open question
+
+The empirical evidence in §8.2 is enough to establish that the strata can decorrelate. It is not enough to answer the strategic question Inflexión's profile poses: does morphological-density-as-op-count-reduction beat token-fragmentation-cost as workloads scale? At five short programs, Inflexión's per-program token win is real; at five thousand longer programs, could the per-op token cost compound enough to invert the conclusion? We do not know. The empirical cascade described in §7 is the right machinery to answer the question, but Stage 1 alone is insufficient; Stages 2–4 of the cascade are required, and Phase 5 of the Inflexión runtime — function definitions and reductions — must ship before more than three of the five sample programs can be measured on running code.
+
+The right disposition for the present paper is therefore: introduce the stratification, present what the stratification reveals, and leave the strategic question open until the empirical cascade has the data to settle it. The four-way stratification, even if every other claim in this paper failed, would still be a useful methodological contribution to the LLM-oriented PL design field, because the field is presently making decisions on a single-verbosity parameter that empirically obscures a real trade. Surfacing the trade is the contribution.
+
+— *§8 drafted 2026-05-13. §9–§11 still to draft. The empirical figures here are the Stage-1-cascade results; subsequent cascade stages will refine the per-op token numbers across more programs and more models. The "Our theory of the contribution" framing in §8.3 is offered as a hypothesis the field can test or refute; we do not claim it as established.*
