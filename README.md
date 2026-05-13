@@ -32,6 +32,25 @@ Babel is a *methodology* paper and an *implementation* in active development. It
 
 Babel is not a production-language toolkit. It is not a replacement for hand-craft (some esoteric languages — Malbolge, Piet, Folders — depend on creative leaps no parameter schema can capture). It is a lever on the *next* eight hundred attempts, not on the existing eight hundred.
 
+## Paper status
+
+The methodology paper [`04`](plans/04-whitepaper-babel.md) is at **Draft 4** as of 2026-05-13 (commit `a301909`). Draft 4 closes the formalisation of all ten audit-surfaced schema extensions surfaced by the 53-artifact field survey:
+
+| | Extension | What it adds |
+|---|---|---|
+| E1 | `base_machine` enum expansion | beyond BF-tape: procedural-with-named-environment, LLM-orchestration, etc. |
+| E2 | `additions_and_removals` 7-sub-axis decomposition | instruction-additions / effect-model / evaluation-strategy / toolchain-targets / observability-primitives / verification-discipline / ecosystem-artifacts |
+| E3 | `verbosity` four-way stratification | bytes / chars / morphemes / tokens *per operation*, separable axes |
+| E4 | `enforcement_locus` set-valued | six values: source-level, parse-time, type-system, runtime, decode-time, post-hoc-verification — most modern systems enforce at multiple loci simultaneously |
+| E5 | `artifact_kind` mechanical axis | language / DSL / IR / decoder-constraint-format / framework / benchmark |
+| E6 | `target_audience` meta-parameter | esolang community / PL researchers / GenAI practitioners / etc. |
+| E7 | `unpredictability` 3 categories + `n/a` | programmer-facing chaos / model-call / reliability-bounded / `n/a — deterministic by design` |
+| E8 | `grammar_regularity` meta-parameter | how mechanically the surface form rewards close reading |
+| E9 | `derivation_relation` 6 originals + `decoder-contract` + `n/a` | structural pair to E4's decode-time locus |
+| E10 | `naturalness` four sub-values + `LLM-friendliness` cluster | vocabulary-substitution / lexical-grammar / deep-grammar / anti-readable; BPE-token alignment, token cost per semantic unit, ambiguity load |
+
+§6 retrospectively decomposes six artifacts (Mierda / La Weá / Wenyan / Inflexión / SimPy / Quasar) under the Draft 4 axes. Companion Installment 07 (LLM-oriented PL design methodology) is in drafting at [`plans/07-whitepaper-llm-oriented-pl.md`](plans/07-whitepaper-llm-oriented-pl.md); §1–§11 drafted, targeted at LMPL 2026 (Oakland, deadline 2026-06-26). The running task list lives at [`plans/00-tasks.md`](plans/00-tasks.md).
+
 ## Citation infrastructure
 
 White papers use Chicago author-date through pandoc and BibTeX. The shared bibliography lives at [`references.bib`](references.bib); the citation-style file lives at [`csl/chicago-author-date.csl`](csl/) (fetched from the [CSL styles repository](https://github.com/citation-style-language/styles) at first render). The canonical citation URL is the `roderickc.com/babel` page; the project does not currently use arXiv (no DOI). If a DOI becomes useful later, [Zenodo](https://zenodo.org) integrates with GitHub releases and assigns one without an endorser. Render with:
