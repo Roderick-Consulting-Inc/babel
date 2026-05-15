@@ -21,10 +21,10 @@ This repository is in its planning phase. The intellectual work — motivation, 
 | 02 | [Inspiration](plans/02-inspiration.md) | Prior art, precedents, the esolang corpus, and the literary-technical tradition the project draws on |
 | 03 | [Position](plans/03-position.md) | What we solve and what we don't |
 | 04 | [White paper: Babel](plans/04-whitepaper-babel.md) | The methodology paper itself, first installment |
-| 05 | [White paper: Inflexión](../Inflexion/plans/05-whitepaper-inflexion.md) | The companion language paper (lives in the sibling [Inflexion repository](../Inflexion/)) |
+| 05 | [White paper: Inflexión](https://github.com/Roderick-Consulting-Inc/inflexion/blob/main/plans/05-whitepaper-inflexion.md) | The companion language paper (lives in the sibling [Inflexion repository](https://github.com/Roderick-Consulting-Inc/inflexion)) |
 | 06 | [Anticipated objections](plans/06-objections.md) | Pushback we expect from each constituency, with current best replies |
 
-A reader new to the project should start with [`01-motivation.md`](plans/01-motivation.md) for the framing and read through `04` for the substantive contribution. The companion language paper in the sibling [`/data/rci/Inflexion/`](../Inflexion/) repository develops one specific instantiation of the design space Babel opens.
+A reader new to the project should start with [`01-motivation.md`](plans/01-motivation.md) for the framing and read through `04` for the substantive contribution. The companion language paper in the sibling [Inflexion](https://github.com/Roderick-Consulting-Inc/inflexion) repository develops one specific instantiation of the design space Babel opens.
 
 ## What this is and is not
 
@@ -79,4 +79,4 @@ Authored by Ramon Rodriguez under the auspices of RCI. Additional authors and co
 
 ## Series
 
-Babel is one half of an ongoing two-part series. The other half is [Inflexión](../Inflexion/), a hand-built Spanish-grammar esoteric language that occupies one specific instantiation of the design space Babel opens. The two artefacts inform each other but do not depend on each other; either can be read on its own.
+Babel is one half of an ongoing two-part series. The other half is [Inflexión](https://github.com/Roderick-Consulting-Inc/inflexion), a hand-built Spanish-grammar esoteric language that occupies one specific instantiation of the design space Babel opens. The two artefacts inform each other but do not depend on each other; either can be read on its own.
