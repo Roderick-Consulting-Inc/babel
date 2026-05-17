@@ -1,0 +1,239 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# FALSE — Babel's first canonical-wiki stack-language parameter sheet (v0.6.0).
+#
+# FALSE was designed by Wouter van Oortmerssen in 1993; the language's
+# reference page is https://esolangs.org/wiki/FALSE. It is one of the
+# earliest minimalist concatenative esolangs — a deliberate exercise in
+# how small a usable Forth-like language could be while still being
+# Turing-complete. The original implementation famously fit in roughly
+# 1 KB of 68000 assembly.
+#
+# Scope of this sheet
+# ===================
+# Babel currently models stack languages with whitespace-separated tokens
+# and an integer stack. We ship the FALSE *operations* one-for-one against
+# their canonical single-character tokens, but written as whitespace-
+# separated atoms — so `1 2 + .` is the FALSE program "push 1, push 2,
+# add, print integer" (would be the four-character `12+.` in canonical
+# FALSE source). The ASCII-punctuation tokenizer extension (where `12+.`
+# tokenizes as four ops with no spaces, and a digit sequence forms a
+# single integer literal) is a follow-up tokenizer feature, not a runtime
+# feature; surfacing it here would put it on a critical path it shouldn't
+# share with the runtime work.
+#
+# Op coverage vs. full FALSE
+# --------------------------
+# Implemented (the integer-stack subset):
+#
+#   Literals : integer literals via `push` (FALSE: bare digit sequences)
+#   Stack    : $ (dup), % (drop), \ (swap), @ (3-rotate)
+#   Arith    : + - * / _ (negate)
+#   Compare  : = > (push -1 for true, 0 for false; FALSE convention)
+#   I/O      : . (print int), , (print char)
+#   Halt     : explicit `halt` token (cross-family `HALT` op)
+#
+# Deferred (need tokenizer / runtime extensions beyond v0.6.0):
+#
+#   Strings  : "..." string literal output — needs a string-aware tokenizer
+#              and a STACK_OUTPUT_STRING op family.
+#   Vars     : a..z named variables with : (store) and ; (fetch) — needs a
+#              named-cell store alongside the stack.
+#   Lambdas  : [ ] code-block literals, ! execute, ? if, # while — needs
+#              first-class code values on the stack and a call stack.
+#   Logic    : & (AND), | (OR), ~ (NOT) — straightforward bitwise ops
+#              once we're sure of the cell-width interaction; intentionally
+#              held back for the same release that ships the AND/OR mask
+#              users (lambdas, control flow).
+#   Input    : ^ (read char) — needs the input-stream plumbing the stack
+#              interpreter's `stdin` parameter already reserves but does
+#              not yet consume.
+#   Flush    : ß / `flush` — Babel's interpreter flushes after every
+#              output op already, so no op gap; flagged here for completeness.
+#
+# What this sheet demonstrates
+# ----------------------------
+# Even with the deferred features, the parameter sheet is enough to express
+# the canonical "Hello, World!" written character-by-character (push each
+# ASCII codepoint and emit), arithmetic with all four basic operations,
+# FALSE-style comparisons, and the three-element rotate. Those programs
+# are exercised end-to-end in `tests/test_false.py`. The next FALSE-scope
+# release will tackle either the string-literal tokenizer (for the one-line
+# canonical Hello World) or the variables-and-lambdas runtime (for FALSE's
+# control flow); both are credible follow-ups to this exemplar.
+
+name: "FALSE"
+version: "0.1.0"
+description: |
+  FALSE (Wouter van Oortmerssen, 1993) — Babel's first canonical-wiki
+  stack-language exemplar. This sheet implements the integer-stack subset:
+  literals, stack rearrangement, the four basic arithmetic operations
+  plus negation, the FALSE comparison ops (`=` and `>` returning the
+  -1/0 boolean convention), and character / integer output. String
+  literals, named variables, lambdas, and the `!`/`?`/`#` control-flow
+  ops are deferred to follow-up releases (see comments in the YAML).
+  Tokens match canonical FALSE source one-for-one but are written
+  whitespace-separated, pending the ASCII-punctuation tokenizer
+  extension to the stack family.
+
+base_machine: stack
+memory_shape: stack_unbounded
+cell_width: arbitrary
+encoding: whitespace_separated_tokens
+io: character
+theme: "minimalist 1990s concatenative esolang"
+source_extension: ".f"
+
+instructions:
+  - token: "push"
+    op: stack_push
+    arity: 1
+    description: >
+      Push the next source atom (parsed as a decimal integer) onto the
+      stack. In canonical FALSE source a bare digit sequence is itself
+      the literal (no `push` keyword); this sheet uses the explicit
+      `push N` form pending the digit-sequence tokenizer extension.
+  - token: "$"
+    op: stack_dup
+    description: "Duplicate the top of stack (canonical FALSE: `$`)."
+  - token: "%"
+    op: stack_pop
+    description: "Drop the top of stack (canonical FALSE: `%`)."
+  - token: "\\"
+    op: stack_swap
+    description: "Swap the top two elements (canonical FALSE: `\\`)."
+  - token: "@"
+    op: stack_rot
+    description: >
+      Rotate the third-from-top element to the top: (a b c -- b c a).
+      Canonical FALSE: `@`.
+  - token: "+"
+    op: stack_add
+    description: "Pop two values; push their sum (canonical FALSE: `+`)."
+  - token: "-"
+    op: stack_sub
+    description: >
+      Pop top (b) then second (a); push a - b (canonical FALSE: `-`).
+  - token: "*"
+    op: stack_mul
+    description: "Pop two values; push their product (canonical FALSE: `*`)."
+  - token: "/"
+    op: stack_div
+    description: >
+      Pop top (b) then second (a); push a // b (Python floor division).
+      Raises a runtime error on division by zero (canonical FALSE: `/`).
+  - token: "_"
+    op: stack_negate
+    description: >
+      Pop top, push its arithmetic negation. FALSE's signature unary
+      negation op (canonical FALSE: `_`).
+  - token: "="
+    op: stack_equals
+    description: >
+      Pop two; push -1 if equal else 0 (FALSE/Forth boolean convention;
+      canonical FALSE: `=`).
+  - token: ">"
+    op: stack_greater
+    description: >
+      Pop top (b), second (a); push -1 if a > b else 0 (canonical FALSE: `>`).
+  - token: "."
+    op: stack_output_int
+    description: "Pop top; write it as a decimal integer (canonical FALSE: `.`)."
+  - token: ","
+    op: stack_output_char
+    description: >
+      Pop top; write it as an ASCII character (low byte) (canonical FALSE: `,`).
+  - token: "halt"
+    op: halt
+    description: >
+      Stop execution. Not a canonical FALSE op (FALSE terminates at
+      end-of-source); included as a cross-family convenience for partial
+      programs.
+
+additions:
+  - "Explicit `push` keyword in place of FALSE's digit-sequence literals (pending ASCII-punctuation tokenizer)."
+  - "Cross-family `halt` token for explicit termination."
+
+removals:
+  - "String literals (`\"...\"`) — deferred to a string-tokenizer follow-up."
+  - "Named variables (a..z, `:` store, `;` fetch) — deferred to a named-store follow-up."
+  - "Lambdas (`[`, `]`, `!`, `?`, `#`) — deferred to a code-value runtime."
+  - "Bitwise logic (`&`, `|`, `~`) — held until AND/OR mask users land."
+  - "Character input (`^`) — deferred pending stdin plumbing in stack runtime."
+
+meta:
+  complexity: medium
+  abstraction: low
+  verbosity: compact
+  playfulness: moderate
+  unpredictability: zero
+  naturalness: none
+
+examples:
+  - title: "Print the letter A"
+    source: "push 65 ,"
+    expected_output: "A"
+    description: >
+      The simplest possible FALSE program in this sheet: push 65, emit
+      it as the ASCII character 'A'. Demonstrates the integer-literal
+      `push` form and the canonical FALSE character-output token `,`.
+
+  - title: "Add 5 and 3, print integer"
+    source: "push 5 push 3 + ."
+    expected_output: "8"
+    description: >
+      Pushes 5, pushes 3, adds them, prints 8. Equivalent canonical
+      FALSE source would be `5 3+.`.
+
+  - title: "Multiply 7 by 6"
+    source: "push 7 push 6 * ."
+    expected_output: "42"
+    description: "Exercises STACK_MUL (FALSE `*`)."
+
+  - title: "Integer divide 20 by 3"
+    source: "push 20 push 3 / ."
+    expected_output: "6"
+    description: >
+      Exercises STACK_DIV with floor semantics. Equivalent canonical
+      FALSE source would be `20 3/.`.
+
+  - title: "Negate 7"
+    source: "push 7 _ ."
+    expected_output: "-7"
+    description: "Exercises STACK_NEGATE, FALSE's `_` op."
+
+  - title: "Equality: is 3 equal to 3?"
+    source: "push 3 push 3 = ."
+    expected_output: "-1"
+    description: >
+      Pushes 3 twice, compares; -1 is FALSE's boolean true. Canonical
+      FALSE source would be `3 3=.`.
+
+  - title: "Greater-than: is 5 greater than 2?"
+    source: "push 5 push 2 > ."
+    expected_output: "-1"
+    description: >
+      Operand order matches the documented STACK_GREATER convention:
+      pop b then a, push -1 if a > b else 0. Canonical FALSE: `5 2>.`.
+
+  - title: "Rotate three values"
+    source: "push 1 push 2 push 3 @ . . ."
+    expected_output: "132"
+    description: >
+      After `push 1 push 2 push 3` the stack is [1, 2, 3]. Rotating
+      (`@` in FALSE) yields [2, 3, 1]. Three `.` ops print the stack
+      top-to-bottom as `1`, then `3`, then `2` — output `"132"`.
+
+  - title: "Hello, World! (character-by-character)"
+    source: |
+      push 72 , push 101 , push 108 , push 108 , push 111 , push 44 , push 32 ,
+      push 87 , push 111 , push 114 , push 108 , push 100 , push 33 , push 10 ,
+    expected_output: "Hello, World!\n"
+    description: >
+      The canonical FALSE Hello World uses string literals
+      (`"Hello, World!\n"`); pending the string-literal tokenizer this
+      sheet ships the equivalent character-by-character program. Each
+      pair `push N ,` pushes the ASCII codepoint and emits it. Tested
+      end-to-end in `tests/test_false.py`.

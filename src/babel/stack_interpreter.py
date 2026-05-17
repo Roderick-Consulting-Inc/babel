@@ -18,7 +18,9 @@ across any `LanguageSpec` whose ``base_machine`` is ``stack``; dispatch
 is on the canonical ``InstructionOp`` values prefixed ``STACK_*`` defined
 in `babel.schema`.
 
-Supported ops (the deliberately minimal v0.4.0 core):
+Supported ops:
+
+v0.4.0 core:
 
 * ``STACK_PUSH`` (arity 1) — push an integer literal read from the next
   source atom onto the stack.
@@ -30,6 +32,19 @@ Supported ops (the deliberately minimal v0.4.0 core):
 * ``STACK_OUTPUT_CHAR`` — pop top, write ``chr(value & 0xff)`` to stdout.
 * ``STACK_OUTPUT_INT`` — pop top, write ``str(value)`` to stdout.
 * ``HALT`` — stop execution.
+
+v0.6.0 additions (FALSE-driven; see `examples/false.yaml`):
+
+* ``STACK_MUL`` — pop two, push their product.
+* ``STACK_DIV`` — pop top (``b``), then second (``a``); push ``a // b``
+  (Python floor division). Raises ``InterpreterError`` on ``b == 0``.
+* ``STACK_NEGATE`` — pop top, push its arithmetic negation.
+* ``STACK_EQUALS`` — pop two; push ``-1`` if equal, ``0`` otherwise
+  (FALSE/Forth boolean convention).
+* ``STACK_GREATER`` — pop top (``b``), second (``a``); push ``-1`` if
+  ``a > b`` else ``0``.
+* ``STACK_ROT`` — rotate the third-from-top element to the top:
+  ``(a b c -- b c a)``.
 
 Supported memory shapes: ``STACK_UNBOUNDED`` (Python list, grows as
 needed) and ``STACK_BOUNDED`` (Python list with a configurable cap;
@@ -284,6 +299,62 @@ def run(
             b = _pop("STACK_SUB")
             a = _pop("STACK_SUB")
             _push(a - b)
+
+        elif op == InstructionOp.STACK_MUL:
+            b = _pop("STACK_MUL")
+            a = _pop("STACK_MUL")
+            _push(a * b)
+
+        elif op == InstructionOp.STACK_DIV:
+            # FALSE-style divide: pop b then a, push a // b. Division by zero
+            # is a runtime error (not a silent zero) so source-level bugs
+            # surface clearly. Floor division is used for parity with FALSE's
+            # integer-stack semantics (Python's `//` on negative operands
+            # rounds toward -inf; FALSE programs that rely on a specific
+            # truncation discipline should normalise operands first).
+            b = _pop("STACK_DIV")
+            a = _pop("STACK_DIV")
+            if b == 0:
+                raise InterpreterError("STACK_DIV: division by zero")
+            _push(a // b)
+
+        elif op == InstructionOp.STACK_NEGATE:
+            value = _pop("STACK_NEGATE")
+            _push(-value)
+
+        elif op == InstructionOp.STACK_EQUALS:
+            # FALSE/Forth boolean convention: -1 for true, 0 for false.
+            # Under non-ARBITRARY cell widths the -1 wraps to the all-ones
+            # bit pattern (255 for BYTE, 2**32-1 for WORD) — intentional,
+            # matches how Forth-family languages use the truth value as a
+            # bitmask for the (not-yet-implemented) AND / OR ops.
+            b = _pop("STACK_EQUALS")
+            a = _pop("STACK_EQUALS")
+            _push(-1 if a == b else 0)
+
+        elif op == InstructionOp.STACK_GREATER:
+            # Same boolean convention as STACK_EQUALS. Comparison uses the
+            # values as they sit on the stack (post-wrap if any).
+            b = _pop("STACK_GREATER")
+            a = _pop("STACK_GREATER")
+            _push(-1 if a > b else 0)
+
+        elif op == InstructionOp.STACK_ROT:
+            # (a b c -- b c a). Standard Forth/FALSE `@`. Underflow surfaces
+            # as a clear runtime error rather than IndexError on `pop`.
+            if len(stack) < 3:
+                raise InterpreterError(
+                    f"stack underflow on STACK_ROT: need 3 elements, have {len(stack)}"
+                )
+            c = stack.pop()
+            b = stack.pop()
+            a = stack.pop()
+            # Rotation values bypass the cell-width wrap (no arithmetic
+            # changes their magnitude) — append directly to avoid double-
+            # wrapping values that were already wrapped on push.
+            stack.append(b)
+            stack.append(c)
+            stack.append(a)
 
         elif op == InstructionOp.STACK_OUTPUT_CHAR:
             value = _pop("STACK_OUTPUT_CHAR")

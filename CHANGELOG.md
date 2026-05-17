@@ -2,6 +2,56 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.6.0] — 2026-05-17
+
+### Added — FALSE parameter sheet (first canonical stack-language exemplar)
+
+Babel's first canonical-wiki stack-language sheet — FALSE
+(Wouter van Oortmerssen, 1993; <https://esolangs.org/wiki/FALSE>). The
+v0.4.0 stack runtime gets its first real-world exemplar from the corpus,
+and the stack op set grows by six ops to cover the integer-stack subset
+of the language.
+
+#### Added
+
+- **`examples/false.yaml`** — 15 tokens (the 14 canonical FALSE single-character ops covered by this scope plus the cross-family `halt` convenience). Tokens map one-for-one to canonical FALSE source (`$ % \\ @ + - * / _ = > . ,`); the integer-literal form is the existing `push N` arity-1 pattern pending the ASCII-punctuation tokenizer extension (where bare digit sequences would form literals). String literals, named variables, lambdas / `!` / `?` / `#`, and the bitwise logic ops are deferred — each is documented in the YAML with the runtime extension it would need.
+- **6 new `InstructionOp` values** in the stack family, all added to `_STACK_OPS`:
+  - `STACK_MUL` — pop two, push product (FALSE `*`)
+  - `STACK_DIV` — pop b then a, push a // b; raises `InterpreterError` on b == 0 (FALSE `/`)
+  - `STACK_NEGATE` — pop top, push `-value` (FALSE `_`, the signature unary negation op)
+  - `STACK_EQUALS` — pop two, push -1 if equal else 0 (FALSE `=`, Forth boolean convention)
+  - `STACK_GREATER` — pop b then a, push -1 if a > b else 0 (FALSE `>`)
+  - `STACK_ROT` — rotate third-from-top to top: `(a b c -- b c a)` (FALSE `@`)
+- **Stack-interpreter handlers** for all six new ops; `STACK_ROT` direct-`append`s to bypass the cell-width wrap (the values are already wrapped on push, no arithmetic produced).
+- **Division-by-zero** surfaces as a clear `InterpreterError("STACK_DIV: division by zero")` rather than a silent zero — source-level bugs surface explicitly.
+
+#### Tests
+
+- 31 new `tests/test_false.py` tests: YAML loads + token inventory + arity check; per-op coverage for all six new ops including underflow paths; canonical Hello World character-by-character end-to-end to `"Hello, World!\n"`; FALSE-specific quirks (the -1/0 boolean convention, postfix arithmetic chain, halt mid-source); cell-width interaction with byte cells confirming the all-ones-mask discipline holds for `EQUALS` / `GREATER` / `NEGATE` under wrap; schema-validator acceptance of the six new ops; package-level `babel.run` dispatch.
+- All 112 previously-passing v0.5.2 tests still pass (112 → 143 total).
+
+#### Boolean convention rationale
+
+FALSE returns `-1` for true and `0` for false (Forth convention). Under `ARBITRARY` cell width (FALSE's canonical setting) this is preserved literally; under bounded widths the `-1` wraps to the all-ones bit pattern (`255` for BYTE, `2**32-1` for WORD) — intentional, and tested. The all-ones pattern is what makes the truth value useful as a mask for the bitwise AND / OR ops a future release will add to lift the deferred FALSE control-flow primitives.
+
+#### What's deferred (and why)
+
+Each of the following needs runtime or tokenizer machinery beyond the v0.6.0 scope, so this sheet ships without them and the YAML calls out the path:
+
+| FALSE feature | Tokens | Blocked on |
+| --- | --- | --- |
+| String literal output | `"..."` | String-aware tokenizer + `STACK_OUTPUT_STRING` |
+| Named variables | a..z, `:`, `;` | Named-cell store alongside the integer stack |
+| Lambdas + control flow | `[ ]`, `!`, `?`, `#` | First-class code values on the stack + call stack |
+| Bitwise logic | `&`, `|`, `~` | Held until the mask users (lambdas) land |
+| Character input | `^` | Stdin plumbing the stack runtime reserves but doesn't yet consume |
+
+The runtime gap on the bigger of those (lambdas) is the natural next milestone for FALSE-scope work; the smaller items (string literal output, named variables) can ship independently.
+
+#### Constraint observed
+
+Per the v0.6.0 work-order constraint, `src/babel/__init__.py`, `src/babel/interpreter.py`, and `src/babel/oisc_interpreter.py` are unchanged in this release. `__version__` inside `__init__.py` therefore still reads `"0.5.2"` (one minor behind `pyproject.toml`'s `"0.6.0"`); the next release that touches the dispatcher should re-sync the two.
+
 ## [0.5.2] — 2026-05-17
 
 ### Added — `BREAK_LOOP` runtime (La Weá's `pico` fully working)

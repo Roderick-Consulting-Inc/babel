@@ -170,6 +170,27 @@ class InstructionOp(str, Enum):
     STACK_OUTPUT_CHAR = "stack_output_char"  # Pop top; output as ASCII char.
     STACK_OUTPUT_INT = "stack_output_int"  # Pop top; output as decimal integer.
 
+    # v0.6.0 additions — six stack ops surfaced by the first canonical-wiki
+    # stack-language exemplar (FALSE). See `examples/false.yaml` and
+    # `research-notes/interpreter-candidates-2026-05-17.md` (§ "Stack-machine
+    # family"). FALSE-driven choices:
+    #   * STACK_MUL / STACK_DIV are pop-two / push-result; STACK_DIV raises
+    #     a clear runtime error on divide-by-zero (no silent zero).
+    #   * STACK_NEGATE is FALSE's signature `_` op, kept as a unary primitive
+    #     rather than synthesised from `0 swap -` (matches the wiki op set
+    #     one-for-one and reads better in the spec page).
+    #   * STACK_EQUALS / STACK_GREATER follow FALSE's boolean convention:
+    #     push -1 for true, 0 for false (Forth-style; the same bit pattern
+    #     also works as a mask for the deferred AND/OR ops).
+    #   * STACK_ROT is the standard Forth/FALSE `@` op — bring the third
+    #     element to the top: (a b c -- b c a).
+    STACK_MUL = "stack_mul"  # Pop two, push their product.
+    STACK_DIV = "stack_div"  # Pop top (b) then second (a); push a // b; b==0 raises.
+    STACK_NEGATE = "stack_negate"  # Pop top, push its arithmetic negation (FALSE `_`).
+    STACK_EQUALS = "stack_equals"  # Pop two; push -1 if equal else 0 (FALSE convention).
+    STACK_GREATER = "stack_greater"  # Pop top (b), second (a); push -1 if a > b else 0.
+    STACK_ROT = "stack_rot"  # Rotate third-from-top to top: (a b c -- b c a).
+
     # v0.4.1 addition — OISC (One Instruction Set Computer) base machine.
     # See research-notes/interpreter-candidates-2026-05-17.md Path B
     # ("~50 LOC" runner-up) and src/babel/oisc_interpreter.py.
@@ -245,6 +266,17 @@ _STACK_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.STACK_SUB,
         InstructionOp.STACK_OUTPUT_CHAR,
         InstructionOp.STACK_OUTPUT_INT,
+        # v0.6.0 additions — FALSE-driven arithmetic, comparison, and stack
+        # rearrangement primitives. The discipline matches the rest of this
+        # set: every op enumerated here must have a clause in
+        # `stack_interpreter._step` (or, equivalently, in the dispatch chain
+        # of `stack_interpreter.run`).
+        InstructionOp.STACK_MUL,
+        InstructionOp.STACK_DIV,
+        InstructionOp.STACK_NEGATE,
+        InstructionOp.STACK_EQUALS,
+        InstructionOp.STACK_GREATER,
+        InstructionOp.STACK_ROT,
         # Cross-family ops legal on a stack machine too.
         InstructionOp.HALT,
     }
