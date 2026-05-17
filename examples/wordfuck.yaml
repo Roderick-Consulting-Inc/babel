@@ -1,0 +1,94 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Wordfuck — a Brainfuck derivative whose instructions are selected by
+# the *length* of each whitespace-separated word. The letters chosen are
+# entirely up to the author: only `len(word)` is consulted at dispatch.
+# A length-1 word is `+`, a length-2 word is `-`, length-3 is `>`, and
+# so on through length-8 (`]`). Programs read as nonsense prose; the
+# semantic meaning is buried in the word-length sequence.
+#
+# Reference: https://esolangs.org/wiki/Wordfuck
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells; encoding is
+# word_length_dispatch (new in v0.6.0). The schema requires unique
+# `token` strings per instruction, so each instruction below carries a
+# *representative* word of the appropriate length — the tokenizer reads
+# the length, not the content, so any word of length N will dispatch to
+# the same op as the representative.
+
+name: Wordfuck
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose dispatch is by *word length*: each
+  whitespace-separated atom selects an instruction based on its
+  character count. The eight canonical operations map to lengths 1
+  through 8. The actual letters used are irrelevant — Wordfuck programs
+  often masquerade as nonsense prose, English-like clauses, or
+  Pig-Latin word salad while encoding a real BF program in their
+  length sequence.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: word_length_dispatch
+io: character
+theme: word_length
+source_extension: .wordfuck
+
+instructions:
+  - token: "a"
+    op: increment
+    description: "Length-1 word → increment the byte at the data pointer."
+  - token: "ab"
+    op: decrement
+    description: "Length-2 word → decrement the byte at the data pointer."
+  - token: "abc"
+    op: ptr_right
+    description: "Length-3 word → move the data pointer one cell right."
+  - token: "abcd"
+    op: ptr_left
+    description: "Length-4 word → move the data pointer one cell left."
+  - token: "abcde"
+    op: output
+    description: "Length-5 word → output the byte at the data pointer as a character."
+  - token: "abcdef"
+    op: input
+    description: "Length-6 word → read one byte of input into the cell at the data pointer."
+  - token: "abcdefg"
+    op: loop_start
+    description: "Length-7 word → if the byte at the data pointer is zero, jump past the matching loop_end."
+  - token: "abcdefgh"
+    op: loop_end
+    description: "Length-8 word → if the byte at the data pointer is non-zero, jump back to the matching loop_start."
+
+meta:
+  complexity: medium
+  abstraction: medium
+  verbosity: hyper
+  playfulness: high
+  unpredictability: zero
+  naturalness: vocabulary
+
+examples:
+  - title: "Print '\\x02'"
+    source: "x y hello"
+    expected_output: "\x02"
+    description: >
+      Three words of lengths 1, 1, 5 → `+ + .` Two increments
+      followed by an OUTPUT. The actual letters (`x`, `y`, `hello`)
+      are arbitrary; any length-1 word would do for the first two
+      and any length-5 word for the third.
+
+  - title: "Print 'A'"
+    source: "a a a a a a a a pqrstuv def a a a a a a a a ghij bc wxyzABCD def a klmno"
+    expected_output: "A"
+    description: >
+      Transliteration of the canonical BF program
+      `++++++++[>++++++++<-]>+.` to Wordfuck. The length sequence is
+      `1 1 1 1 1 1 1 1 7 3 1 1 1 1 1 1 1 1 4 2 8 3 1 5` — eight
+      increments, loop start (length 7), pointer right, eight
+      increments on the next cell, pointer left, decrement, loop end,
+      pointer right, increment, output. Any actual words of the
+      matching lengths would work; the spelling carries no information.

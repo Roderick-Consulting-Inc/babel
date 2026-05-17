@@ -2,6 +2,39 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.6.1] — 2026-05-17
+
+### Added — `VARIABLE_LENGTH_BINARY` (Spoon) + `WORD_LENGTH_DISPATCH` (Wordfuck) tokenizers
+
+Closes the last two encoding-stub items from the v0.2.0 schema bundle. Both encoding values have been schema-legal since v0.2.0, but the BF-tape tokenizer raised `ParseError("not yet supported")` when asked to actually parse a source against either of them. v0.6.1 wires up the tokenizer for both, with two new parameter sheets that exercise each end-to-end.
+
+(Versioned as v0.6.1 rather than v0.6.0 because the v0.6.0 slot was concurrently claimed by the FALSE-parameter-sheet release immediately below; the intended bump for this tokenizer batch under the pre-1.0 minor-bump-for-new-schema-capability convention is v0.6.0 in isolation. Both releases ship the same day on the same branch.)
+
+#### Added
+
+- **`VARIABLE_LENGTH_BINARY` tokenizer.** Spoon-style Huffman / prefix-free bit-string encoding: source is a stream of `0` and `1` characters; any other character is silently skipped (treated as a comment — whitespace, newlines, prose annotations all pass through transparently). The tokenizer walks the source bit-by-bit, accumulates into a buffer, and emits the moment the buffer matches a defined code. Because the canonical code set is prefix-free by construction, the first match is also the longest match — no lookahead needed. Trailing bits at end-of-source that do not complete any token raise `ParseError`. Arity > 0 is rejected at tokenize time (bit-strings have no defined operand-position semantics).
+- **`WORD_LENGTH_DISPATCH` tokenizer.** Wordfuck-style: only the *length* of each whitespace-separated atom matters; the letters chosen are commentary. The parameter sheet's `token` field carries a representative word of each length so the schema's per-token uniqueness check still holds; the tokenizer builds a `{length: op}` map from those representatives and dispatches on `len(atom)` for each source atom. Unknown atom lengths raise `ParseError` with the offending length and the legal length set quoted. Two instructions sharing a token length on one spec raise `ParseError` at tokenize time (the sheet would be ambiguous). Arity > 0 is rejected at tokenize time (operand atoms would also be dispatched by length and become indistinguishable from new instructions).
+- **`examples/spoon.yaml`** — the canonical Spoon-style parameter sheet. Eight prefix-free bit-string codes covering the canonical BF op set; theme `huffman`, source_extension `.spoon`. The mapping matches the schema-validation reference in `tests/test_schema_relaxed_completeness.py` (v0.2.0). Includes a tiny `1 1 00101` example and a full transliteration of `++++++++[>++++++++<-]>+.` to print `A`.
+- **`examples/wordfuck.yaml`** — the canonical Wordfuck parameter sheet. Eight length-N placeholder tokens (lengths 1..8) covering the canonical BF op set; theme `word_length`, source_extension `.wordfuck`. Includes a tiny `a a abcde` example and a full transliteration of the canonical BF "print A" program.
+
+#### Tests
+
+- 7 new `tests/test_spoon.py` tests: YAML loads + 8-op inventory + bit-string-only-tokens check; tiny `1 1 00101` → `\x02`; non-bit characters are comments; trailing-bits source raises `ParseError`; arity > 0 on a `VARIABLE_LENGTH_BINARY` spec raises `ParseError`; canonical BF Hello World transliterated to Spoon via `_to_spoon()` runs to `"Hello World!\n"`; every YAML example produces its declared `expected_output`.
+- 8 new `tests/test_wordfuck.py` tests: YAML loads + 8-op inventory + length-1..8 coverage check; tiny `a a abcde` → `\x02`; unknown-length atom raises `ParseError`; word *content* is irrelevant (different length-1 words dispatch the same); arity > 0 raises `ParseError`; duplicate-length spec raises `ParseError`; canonical BF Hello World transliterated to Wordfuck via `_to_wordfuck()` runs to `"Hello World!\n"`; every YAML example produces its declared `expected_output`.
+- All 112 previously-passing v0.5.2 tests still pass (+15 from this tokenizer batch → 127 with the tokenizer slice only; combined with the v0.6.0 FALSE batch the full suite is 158).
+
+#### Schema encoding-stubs remaining
+
+None on the v0.2.0 list for the BF-tape family. The two encoding values v0.2.0 introduced for tokenizer follow-up (`VARIABLE_LENGTH_BINARY`, `WORD_LENGTH_DISPATCH`) both ship runtime today. The earlier `UNARY` and `BINARY` encoding values from v0.1.0 remain schema-legal but have no canonical exemplar in the corpus that motivated dedicated tokenizer work; `TWO_DIMENSIONAL_GRID` is reserved for the fungeoid family (separate Path B).
+
+#### A note on the Spoon spec
+
+The esolangs wiki page for Spoon and the various secondary writeups give slightly different code assignments for the eight canonical ops; several common ones (e.g. `0010` for `]` paired with `00100` for `,`) are not actually prefix-free, which makes greedy left-to-right scanning ambiguous. Babel's sheet picks a mapping that **is** prefix-free, matches the schema-validation reference in `tests/test_schema_relaxed_completeness.py`, and renders the longest-prefix-match property a trivial first-match check. Spec-page authors who want to track a specific Spoon variant should override the eight token strings; the tokenizer accepts any prefix-free code set.
+
+#### Note on the v0.6.0 "Constraint observed" claim
+
+The v0.6.0 FALSE release notes (below) state that `src/babel/interpreter.py` is unchanged in this release; that constraint was true at v0.6.0 commit time but no longer holds at v0.6.1 (this release modifies `_tokenize` to add the two new encoding paths). Both releases ship together on the same branch and should be considered jointly; the FALSE constraint note refers to that release's own diff, not the cumulative branch state.
+
 ## [0.6.0] — 2026-05-17
 
 ### Added — FALSE parameter sheet (first canonical stack-language exemplar)

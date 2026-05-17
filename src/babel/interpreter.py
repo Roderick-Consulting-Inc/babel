@@ -87,7 +87,7 @@ class _ParsedProgram:
 def _tokenize(source: str, spec: LanguageSpec) -> tuple[list[InstructionOp], list[int | None]]:
     """Convert source text into parallel lists of canonical ops + operands.
 
-    The two encodings the vertical slice supports:
+    The encodings the BF-tape tokenizer supports:
 
     * ``ASCII_PUNCTUATION``: tokens are single characters (Müller BF). We
       walk the source character-by-character; characters that are not in
@@ -106,6 +106,22 @@ def _tokenize(source: str, spec: LanguageSpec) -> tuple[list[InstructionOp], lis
       operands raise ``ParseError``. Multi-atom tokens (Ook!-style) are
       still single-atom-per-instruction logically; arity on a multi-atom
       token is rejected at tokenize time for the same reason as above.
+    * ``VARIABLE_LENGTH_BINARY`` (v0.6.0; Spoon-style): tokens are
+      Huffman / prefix-free bit-strings (only `0`/`1` count as code; any
+      other character is a comment). Walk the source bit-by-bit,
+      accumulating into a buffer and emitting the moment the buffer
+      matches a defined code. Trailing bits at end-of-source raise
+      ``ParseError``. Arity > 0 is rejected at tokenize time (bit-strings
+      have no defined operand-position semantics).
+    * ``WORD_LENGTH_DISPATCH`` (v0.6.0; Wordfuck-style): only the *length*
+      of each whitespace-separated atom matters. The parameter sheet's
+      `token` carries a representative word of each length to satisfy the
+      schema's per-token uniqueness check; the tokenizer dispatches on
+      `len(atom)`. Unknown lengths raise ``ParseError``. Two instructions
+      with the same token length on one spec raise ``ParseError`` (the
+      sheet would be ambiguous). Arity > 0 is rejected at tokenize time
+      (operand atoms would be indistinguishable from instructions under
+      length-only dispatch).
 
     Returns ``(ops, operands)`` where ``operands[i]`` is the runtime
     operand for ``ops[i]`` (``None`` if the op has arity 0).
@@ -128,6 +144,87 @@ def _tokenize(source: str, spec: LanguageSpec) -> tuple[list[InstructionOp], lis
                 ops.append(token_to_op[ch])
                 operands.append(None)
             # else: treat as comment, skip silently
+        return ops, operands
+
+    if spec.encoding == Encoding.VARIABLE_LENGTH_BINARY:
+        # Spoon-style Huffman / prefix-free bit-string codes. The source is a
+        # stream of `0` and `1` characters; any other character is ignored
+        # (treated as a comment — whitespace, newlines, narrative text all
+        # pass through transparently). We walk the source bit by bit,
+        # accumulating into a buffer and emitting the moment the buffer
+        # matches a defined token. Because the canonical token set is
+        # prefix-free by construction, the first match is also the longest
+        # match (and therefore unambiguous).
+        #
+        # Trailing bits at end-of-source that do not complete any token are
+        # surfaced as ParseError — silently dropping them would mask a real
+        # truncation bug and could leave intent ambiguous.
+        if has_arity:
+            raise ParseError(
+                "variable_length_binary encoding does not support arity > 0 ops "
+                "(bit-strings have no defined operand-position semantics); "
+                "offending ops: "
+                f"{sorted(i.op.value for i in spec.instructions if i.arity > 0)}"
+            )
+        ops = []
+        operands = []
+        buf = ""
+        for ch in source:
+            if ch != "0" and ch != "1":
+                continue  # comment / formatting char
+            buf += ch
+            if buf in token_to_op:
+                ops.append(token_to_op[buf])
+                operands.append(None)
+                buf = ""
+        if buf:
+            raise ParseError(
+                f"variable_length_binary source ended with unmatched trailing "
+                f"bits {buf!r}; defined codes are {sorted(token_to_op)}"
+            )
+        return ops, operands
+
+    if spec.encoding == Encoding.WORD_LENGTH_DISPATCH:
+        # Wordfuck-style dispatch: only the *length* of each whitespace-
+        # separated atom matters; the letters chosen are commentary. The
+        # parameter sheet's `token` field carries a representative word of
+        # each length so the schema's per-token uniqueness check still
+        # holds; the tokenizer builds a `{length: op}` map from those
+        # representatives and dispatches by `len(atom)` for each source
+        # atom.
+        #
+        # If two instructions on the same spec advertise the same token
+        # length, the parameter sheet itself is ambiguous (two different
+        # ops claim the same dispatch key) — surface that at tokenize
+        # time rather than silently picking one.
+        if has_arity:
+            raise ParseError(
+                "word_length_dispatch encoding does not support arity > 0 ops "
+                "(operand atoms are also dispatched by length and would be "
+                "indistinguishable from new instructions); offending ops: "
+                f"{sorted(i.op.value for i in spec.instructions if i.arity > 0)}"
+            )
+        length_to_op: dict[int, InstructionOp] = {}
+        for instr in spec.instructions:
+            n = len(instr.token)
+            if n in length_to_op:
+                raise ParseError(
+                    f"word_length_dispatch spec has two instructions with the "
+                    f"same token length ({n}): {length_to_op[n].value!r} and "
+                    f"{instr.op.value!r}; dispatch would be ambiguous"
+                )
+            length_to_op[n] = instr.op
+        ops = []
+        operands = []
+        for atom in source.split():
+            n = len(atom)
+            if n not in length_to_op:
+                raise ParseError(
+                    f"word_length_dispatch encountered atom {atom!r} of length "
+                    f"{n}; defined lengths are {sorted(length_to_op)}"
+                )
+            ops.append(length_to_op[n])
+            operands.append(None)
         return ops, operands
 
     if spec.encoding == Encoding.WHITESPACE_SEPARATED_TOKENS:
@@ -221,7 +318,8 @@ def _tokenize(source: str, spec: LanguageSpec) -> tuple[list[InstructionOp], lis
 
     raise ParseError(
         f"interpreter does not yet support encoding={spec.encoding.value}; "
-        "supported encodings are ascii_punctuation and whitespace_separated_tokens"
+        "supported encodings are ascii_punctuation, whitespace_separated_tokens, "
+        "variable_length_binary, and word_length_dispatch"
     )
 
 

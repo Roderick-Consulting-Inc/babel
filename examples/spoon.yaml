@@ -1,0 +1,97 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Spoon — a Brainfuck derivative whose instructions are encoded as a
+# Huffman-style prefix-free bit-string code. Each of the eight canonical
+# BF operations is assigned a unique bit-string; shorter codes are
+# allocated to more-frequent operations so a typical program is denser
+# than its punctuation-stream equivalent. The source is a stream of
+# `0` and `1` characters with no separator; any other character is
+# treated as a comment.
+#
+# Reference: https://esolangs.org/wiki/Spoon
+#
+# Note on the canonical mapping. The esolangs wiki and the various
+# secondary writeups give slightly different code assignments — some
+# variants are not actually prefix-free (`0010` ⊂ `00100`). Babel's sheet
+# uses an assignment that **is** prefix-free, which is what makes
+# longest-prefix-match (and therefore greedy left-to-right scanning)
+# unambiguous. The mapping below matches the schema-validation test in
+# `tests/test_schema_relaxed_completeness.py` (v0.2.0).
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells; encoding is
+# variable_length_binary (new in v0.6.0). Eight instructions, the
+# canonical BF op set.
+
+name: Spoon
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose surface tokens are prefix-free bit-strings
+  rather than ASCII punctuation. Each of the eight canonical operations
+  is assigned a unique Huffman-style bit-string; programs are streams of
+  `0` and `1` characters and any other character is ignored as a comment.
+  Shorter codes go to more-frequent operations (`+` is just `1`); the
+  result is denser than the punctuation-stream BF it transliterates.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: variable_length_binary
+io: character
+theme: huffman
+source_extension: .spoon
+
+instructions:
+  - token: "1"
+    op: increment
+    description: "Increment the byte at the data pointer (shortest code: most frequent op)."
+  - token: "000"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "010"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "011"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "00100"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "00101"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "00110"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching loop_end."
+  - token: "00111"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching loop_start."
+
+meta:
+  complexity: medium
+  abstraction: low
+  verbosity: compact
+  playfulness: low
+  unpredictability: zero
+  naturalness: none
+
+examples:
+  - title: "Print '\\x02'"
+    source: "1 1 00101"
+    expected_output: "\x02"
+    description: >
+      Two increments (`1 1` → cell = 2) followed by an OUTPUT
+      (`00101`). Whitespace is ignored, so spaces between codes are
+      optional and act as formatting.
+
+  - title: "Print 'A'"
+    source: "11111111 00110 010 11111111 011 000 00111 010 1 00101"
+    expected_output: "A"
+    description: >
+      Transliteration of the canonical BF program
+      `++++++++[>++++++++<-]>+.` to Spoon. Whitespace between bit-codes
+      is ignored, so the spacing is purely for human readability.
+      Be careful with prose-style comments — any literal `0` or `1`
+      character inside them would be interpreted as part of the
+      bit-stream.
