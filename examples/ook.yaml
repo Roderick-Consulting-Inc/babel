@@ -1,0 +1,65 @@
+# Ook! — a Brainfuck derivative by David Morgan-Mar (2001).
+#
+# Each canonical Brainfuck instruction maps to a pair of three base tokens
+# (`Ook.`, `Ook?`, `Ook!`). The 8 BF instructions × 3 tokens × 2 = 8 pairs,
+# of which all 8 are used. The pairing was chosen so that the language is
+# "easily writable by orangutans" — hence the name (a reference to Terry
+# Pratchett's Discworld librarian).
+#
+# Reference: https://esolangs.org/wiki/Ook!
+#
+# Babel-fit: brainfuck_tape base machine, 1d_unbounded memory, byte cells,
+# whitespace_separated_tokens encoding with two-atom tokens. The multi-atom
+# tokenizer that ships in Babel v0.3.0 reads the two-Ook pair as a single
+# instruction.
+
+name: Ook!
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose surface syntax consists entirely of pairs of
+  three base tokens — `Ook.`, `Ook?`, `Ook!`. Each canonical Brainfuck
+  instruction maps to a unique pair, making the language readable (and
+  writable) by anyone who can distinguish three Ook tokens, including, per
+  the language's premise, orangutans.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+theme: orangutan
+source_extension: .ook
+
+instructions:
+  - token: "Ook. Ook?"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "Ook? Ook."
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "Ook. Ook."
+    op: increment
+    description: "Increment the byte at the data pointer."
+  - token: "Ook! Ook!"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "Ook! Ook."
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "Ook. Ook!"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "Ook! Ook?"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `Ook? Ook!`."
+  - token: "Ook? Ook!"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `Ook! Ook?`."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: hyper
+  playfulness: high
+  unpredictability: zero
+  naturalness: vocabulary

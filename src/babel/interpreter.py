@@ -101,14 +101,55 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
         return ops
 
     if spec.encoding == Encoding.WHITESPACE_SEPARATED_TOKENS:
+        # Two flavours under this encoding:
+        #   * single-atom tokens (each instruction is one whitespace-separated atom).
+        #     This is the Rioplatense-BF case and most other vocabulary skins.
+        #   * multi-atom tokens (an instruction is two-or-more atoms separated by
+        #     whitespace — e.g. Ook!'s "Ook. Ook?" pair). For this case the
+        #     tokenizer walks the atom stream with greedy longest-match.
+        has_multi_atom = any(" " in t.strip() for t in token_to_op)
+
+        if not has_multi_atom:
+            ops = []
+            for raw in source.split():
+                if raw not in token_to_op:
+                    raise ParseError(
+                        f"unknown token {raw!r}; defined tokens are "
+                        f"{sorted(token_to_op)}"
+                    )
+                ops.append(token_to_op[raw])
+            return ops
+
+        # Multi-atom path: pre-split each token into its atom tuple, then walk
+        # the source's atom stream consuming the longest matching prefix at
+        # each position. This is greedy — first token sorted longest-first wins
+        # any tie.
+        token_to_atoms: list[tuple[tuple[str, ...], InstructionOp]] = sorted(
+            ((tuple(t.split()), op) for t, op in token_to_op.items()),
+            key=lambda pair: len(pair[0]),
+            reverse=True,
+        )
+        max_atoms = token_to_atoms[0][0].__len__()
+        atoms = source.split()
         ops = []
-        for raw in source.split():
-            if raw not in token_to_op:
+        i = 0
+        while i < len(atoms):
+            matched = False
+            for tok_atoms, op in token_to_atoms:
+                n = len(tok_atoms)
+                if n > len(atoms) - i:
+                    continue
+                if tuple(atoms[i : i + n]) == tok_atoms:
+                    ops.append(op)
+                    i += n
+                    matched = True
+                    break
+            if not matched:
                 raise ParseError(
-                    f"unknown token {raw!r}; defined tokens are "
+                    f"unknown token sequence at atom index {i}: "
+                    f"{atoms[i : i + max_atoms]!r}; defined tokens are "
                     f"{sorted(token_to_op)}"
                 )
-            ops.append(token_to_op[raw])
         return ops
 
     raise ParseError(
