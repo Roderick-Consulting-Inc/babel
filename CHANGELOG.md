@@ -2,6 +2,37 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.4.1] — 2026-05-17
+
+### Added — OISC Subleq interpreter (one-instruction-set computer)
+
+The second non-tape base machine lands in Babel after the planned stack family (v0.4.0). Subleq is the canonical [One Instruction Set Computer](https://esolangs.org/wiki/Subleq) — a single instruction `SUBLEQ a b c` (subtract and branch if less than or equal to zero) is Turing-complete on its own. The interpreter is the "~50 LOC" Path B investment flagged by the [BF-family interpreter-candidates survey](research-notes/interpreter-candidates-2026-05-17.md) for its high narrative density (the "one instruction" headline) and modest implementation cost.
+
+Versioning note: this release assumes the stack-runtime branch lands first as v0.4.0; if the merge order changes, re-version on integration.
+
+#### Added
+
+- **`src/babel/oisc_interpreter.py`** — new interpreter module, sibling to the BF-tape interpreter. Self-contained parse + run loop; the module docstring documents the Babel Subleq dialect:
+  - **Program format**: whitespace-separated signed integers; atom count must be a multiple of 3.
+  - **Memory**: the program *is* the memory (self-modifying); arbitrary-precision Python ints; auto-extends on `TAPE_1D_UNBOUNDED`.
+  - **PC**: starts at 0; absolute memory index (not instruction index); the c-operand is the post-jump PC directly.
+  - **Halt**: `c < 0` after the SUBLEQ step, or PC running past end of memory.
+  - **I/O**: address `-1` is the I/O port with operand-position disambiguation — `a == -1` reads one byte from stdin into `mem[b]`; `b == -1` emits the low byte of `mem[a]` to stdout. I/O steps skip the subtract and treat `new_b` as 0 (so the c-jump fires unconditionally).
+- **`InstructionOp.SUBLEQ`** — new canonical op for the single Subleq instruction.
+- **`LanguageSpec._check_oisc_shape`** — new cross-field validator: every instruction on an OISC spec must have `arity == 3`. Op identity (`SUBLEQ` vs. another op) is enforced at *runtime* by the interpreter, not at schema time, so the v0.3.3 placeholder-op test affordance still validates.
+- **`examples/subleq.yaml`** — canonical Subleq parameter sheet; theme `oisc`, source_extension `.sub`, single instruction with `op: subleq` and `arity: 3`. Includes a "Halt immediately" and a "Print 'A'" example, both verified by tests.
+
+#### Tests
+
+- 18 new `tests/test_oisc_interpreter.py` tests covering: empty / whitespace-only programs, `c < 0` halt, PC-runs-off-end halt, multi-step decrement program, OUTPUT one and two characters, INPUT step, parse errors (non-multiple-of-3, non-integer atom), step cap on infinite loop, non-OISC-spec rejection, runtime rejection of legacy placeholder-op specs, schema-time rejection of non-arity-3 OISC specs, and end-to-end YAML loading + example execution.
+- All 54 previously-passing tests still pass (54 → 72 total).
+
+#### Constraints honoured
+
+- BF-tape interpreter (`src/babel/interpreter.py`) untouched.
+- Existing tests untouched (no import-path updates needed).
+- New operand-aware tokenization lives inside `oisc_interpreter.py`; the BF-tape tokenizer is not modified.
+
 ## [0.3.3] — 2026-05-17
 
 ### Added — `Instruction.arity` field (operand-slot extension deferred from v0.2.0)

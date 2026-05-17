@@ -144,6 +144,11 @@ class InstructionOp(str, Enum):
     BREAK_LOOP = "break_loop"  # Exit innermost enclosing loop (Brainlove); interpreter NotImplementedError pending runtime support
     JUMP_UNCONDITIONAL = "jump_unconditional"  # Unconditional jump to label/target (La Weá); interpreter NotImplementedError pending operand-slot support
 
+    # v0.4.1 addition — OISC (One Instruction Set Computer) base machine.
+    # See research-notes/interpreter-candidates-2026-05-17.md Path B
+    # ("~50 LOC" runner-up) and src/babel/oisc_interpreter.py.
+    SUBLEQ = "subleq"  # SUBLEQ a b c — mem[b] -= mem[a]; if mem[b] <= 0 jump to c.
+
 
 # Operations that are only valid on a Brainfuck-tape base machine.
 _TAPE_OPS: frozenset[InstructionOp] = frozenset(
@@ -487,6 +492,40 @@ class LanguageSpec(BaseModel):
             raise ValueError(
                 f"fungeoid_2d base machine requires encoding=two_dimensional_grid, "
                 f"got {self.encoding.value}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_oisc_shape(self) -> LanguageSpec:
+        """OISC base machines must have SUBLEQ-shaped (arity=3) instructions.
+
+        Babel's OISC dialect (see ``babel.oisc_interpreter`` module docstring)
+        is Subleq: one canonical operation with three operands ``a b c``.
+        At the schema level we enforce the *arity* part of that shape:
+        every instruction on an OISC spec must declare ``arity == 3``.
+
+        The *op identity* (``InstructionOp.SUBLEQ`` vs. another op) is not
+        checked here — the v0.3.3 ``test_oisc_subleq_shaped_spec_validates``
+        test deliberately seeded a spec with a placeholder op + arity=3
+        before the SUBLEQ op existed, and we keep that schema affordance.
+        The runtime check (in ``babel.oisc_interpreter``) raises a clear
+        error if an OISC spec wires up an op other than ``SUBLEQ``.
+
+        A spec is free to expose more than one *surface token* for the
+        Subleq operation (e.g., a token alias for theming) — each token
+        still consumes three operand atoms.
+
+        Non-OISC specs are not checked here; only the OISC base is
+        constrained, matching the "one instruction set" semantics.
+        """
+        if self.base_machine != BaseMachine.OISC:
+            return self
+        bad_arity = [(i.token, i.arity) for i in self.instructions if i.arity != 3]
+        if bad_arity:
+            raise ValueError(
+                "oisc language must have arity=3 on every instruction "
+                "(SUBLEQ a b c consumes three operand atoms); "
+                f"got non-3 arity on: {bad_arity}"
             )
         return self
 
