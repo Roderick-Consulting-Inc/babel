@@ -36,7 +36,7 @@ from __future__ import annotations
 import random
 import sys
 from dataclasses import dataclass, field
-from typing import IO
+from typing import IO, Any, Callable
 
 from babel.schema import (
     BaseMachine,
@@ -376,6 +376,35 @@ def _wrap_cell(value: int, modulus: int | None) -> int:
     return value % modulus
 
 
+class _TeeingWriter:
+    """A stdout-shaped wrapper that records what was written since last reset.
+
+    Used by Witness Mode to capture the per-step ``emit`` chunk without
+    requiring callers to use a particular stream type. When ``trace_hook``
+    is None we never instantiate this — zero overhead on the hot path.
+    """
+    def __init__(self, inner: IO[str]) -> None:
+        self.inner = inner
+        self._chunk = ""
+
+    def write(self, s: str) -> int:
+        self.inner.write(s)
+        self._chunk += s
+        return len(s)
+
+    def flush(self) -> None:
+        if hasattr(self.inner, "flush"):
+            self.inner.flush()
+
+    def take_chunk(self) -> str:
+        chunk, self._chunk = self._chunk, ""
+        return chunk
+
+
+class _WitnessLimitReached(Exception):
+    """Raised internally by a trace_hook to halt execution after the cap."""
+
+
 def run(
     source: str,
     spec: LanguageSpec,
@@ -385,6 +414,7 @@ def run(
     bounded_size: int = 30000,
     max_steps: int | None = None,
     rng: random.Random | None = None,
+    trace_hook: Callable[[dict[str, Any]], None] | None = None,
 ) -> None:
     """Execute ``source`` against ``spec``.
 
@@ -411,12 +441,19 @@ def run(
     stdout = stdout if stdout is not None else sys.stdout
     rng = rng if rng is not None else random.Random()
 
+    # Witness Mode: wrap stdout so we can capture per-step emit chunks
+    tee: _TeeingWriter | None = None
+    if trace_hook is not None:
+        tee = _TeeingWriter(stdout)
+        stdout = tee  # type: ignore[assignment]
+
     program = parse(source, spec)
     state = _new_tape(spec, bounded_size=bounded_size)
     modulus = _CELL_MODULUS[spec.cell_width]
     shape = spec.memory_shape
     io_model = spec.io
     ops = program.ops
+    operands = program.operands
     jt = program.jump_table
 
     pc = 0
@@ -426,6 +463,18 @@ def run(
             raise InterpreterError(f"max_steps={max_steps} exceeded")
         steps += 1
         op = ops[pc]
+        # Witness snapshot — captured before the op mutates state. The
+        # post-state (ptr_after, cell_after, emit) is patched in after the
+        # op's handler runs, just before the hook fires.
+        if trace_hook is not None:
+            _trace_pre = {
+                "step": steps,
+                "pc": pc,
+                "op": op.value,
+                "operand": operands[pc] if pc < len(operands) else None,
+                "ptr_before": state.ptr,
+                "cell_before": state.cells[state.ptr] if 0 <= state.ptr < len(state.cells) else 0,
+            }
 
         if op == InstructionOp.PTR_RIGHT:
             state.ptr += 1
@@ -622,5 +671,18 @@ def run(
 
         else:
             raise InterpreterError(f"unhandled op {op.value}")
+
+        if trace_hook is not None:
+            _trace_pre["ptr_after"] = state.ptr
+            _trace_pre["cell_after"] = (
+                state.cells[state.ptr] if 0 <= state.ptr < len(state.cells) else 0
+            )
+            # 7-cell window centered on the post-step pointer
+            _lo = max(0, state.ptr - 3)
+            _hi = min(len(state.cells), state.ptr + 4)
+            _trace_pre["cells_window"] = state.cells[_lo:_hi]
+            _trace_pre["window_offset"] = _lo
+            _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+            trace_hook(_trace_pre)
 
         pc += 1

@@ -68,9 +68,9 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from typing import IO
+from typing import IO, Any, Callable
 
-from babel.interpreter import InterpreterError, ParseError
+from babel.interpreter import InterpreterError, ParseError, _TeeingWriter
 from babel.schema import (
     BaseMachine,
     CellWidth,
@@ -217,6 +217,7 @@ def run(
     stdout: IO[str] | None = None,
     bounded_size: int = 4096,
     max_steps: int | None = None,
+    trace_hook: "Callable[[dict[str, Any]], None] | None" = None,
 ) -> None:
     """Execute ``source`` against ``spec`` on the stack machine.
 
@@ -244,6 +245,12 @@ def run(
     _ = stdin if stdin is not None else sys.stdin  # reserved for future input ops
     stdout = stdout if stdout is not None else sys.stdout
 
+    # Witness Mode: wrap stdout so we can capture per-step emit chunks
+    tee: _TeeingWriter | None = None
+    if trace_hook is not None:
+        tee = _TeeingWriter(stdout)
+        stdout = tee  # type: ignore[assignment]
+
     program = parse(source, spec)
     cap = _new_stack_bound(spec, bounded_size)
     modulus = _STACK_MODULUS[spec.cell_width]
@@ -270,6 +277,16 @@ def run(
         steps += 1
         item = program[pc]
         op = item.op
+        # Witness snapshot — pre-state captured before the op mutates the stack.
+        _trace_pre = None
+        if trace_hook is not None:
+            _trace_pre = {
+                "step": steps,
+                "pc": pc,
+                "op": op.value,
+                "operand": item.operand,
+                "stack_before": list(stack),
+            }
 
         if op == InstructionOp.STACK_PUSH:
             assert item.operand is not None  # tokenizer guarantees this
@@ -376,5 +393,10 @@ def run(
                 f"stack interpreter has no dispatch for op {op.value!r}; "
                 "this should have been rejected at schema validation time"
             )
+
+        if trace_hook is not None and _trace_pre is not None:
+            _trace_pre["stack_after"] = list(stack)
+            _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+            trace_hook(_trace_pre)
 
         pc += 1

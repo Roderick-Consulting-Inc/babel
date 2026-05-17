@@ -2,6 +2,28 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.7.0] — 2026-05-17
+
+### Added
+
+- **Witness / tracing hook on every interpreter.** All four `run()` functions (`babel.interpreter`, `babel.stack_interpreter`, `babel.oisc_interpreter`, `babel.fungeoid_interpreter`) gained an optional `trace_hook: Callable[[dict], None] | None = None` keyword argument. When non-None, the hook fires once per executed instruction with a family-specific state snapshot:
+  - **BF-tape** → `{step, pc, op, operand, ptr_before, cell_before, ptr_after, cell_after, cells_window, window_offset, emit}`
+  - **Stack / FALSE** → `{step, pc, op, operand, stack_before, stack_after, emit}`
+  - **OISC (Subleq)** → `{step, pc, op, a, b, c, mem_a_before, mem_b_before, new_b, mem_a_after, mem_b_after, jumped, next_pc, emit}`
+  - **Fungeoid (Befunge)** → `{step, row, col, dir, cell, string_mode, op, stack_before, stack_after, next_row, next_col, next_dir, emit}`
+- New shared helper `_TeeingWriter` in `babel.interpreter` — a stdout wrapper that records the per-step emit chunk. Used by all four interpreters under witness mode to capture what each instruction wrote. Hooks always receive the `emit` field even for non-output ops (empty string).
+- Used by `babel-playground` v0.5.0 to power its Witness Mode UI (per-step trace, scrubbable, per-family state renderer).
+
+### Behaviour notes
+
+- When `trace_hook=None` (the default for all existing callers): zero behavioural change, zero per-step overhead. All 193 existing tests pass unchanged.
+- The hook is invoked **after** the op has mutated state, so the snapshot reflects post-step values. For families with `HALT` ops that early-return (stack, fungeoid), the HALT step is also reported before returning.
+- Hooks may raise to abort execution — Babel propagates the exception out of `run()`. The playground uses this with a sentinel `_WitnessStepCapReached` to enforce a 10,000-step cap without modifying `max_steps`.
+
+### Fixed
+
+- `examples/brainfuck-rioplatense.yaml` "Halve and print" example: had 2073 `más` tokens (wrapping to 25 mod 256) where the description claimed 260; emitted `\x06` instead of `'A'`. Rewritten to 130 `más` + 1 `ito` + `decí` → `'A'`, matching the description.
+
 ## [0.6.2] — 2026-05-17
 
 ### Added — Fungeoid 2D base machine + Befunge-93 parameter sheet (third non-tape runtime)

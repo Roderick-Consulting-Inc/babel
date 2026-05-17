@@ -134,8 +134,9 @@ from __future__ import annotations
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import IO
+from typing import IO, Any, Callable
 
+from babel.interpreter import _TeeingWriter
 from babel.schema import (
     BaseMachine,
     Encoding,
@@ -285,6 +286,7 @@ def run(
     stdin: IO[str] | None = None,
     stdout: IO[str] | None = None,
     max_steps: int = 100_000,
+    trace_hook: Callable[[dict[str, Any]], None] | None = None,
 ) -> None:
     """Execute Befunge-93 ``source`` against ``spec``.
 
@@ -323,6 +325,12 @@ def run(
     _ = stdin if stdin is not None else sys.stdin  # reserved for future input ops
     stdout = stdout if stdout is not None else sys.stdout
 
+    # Witness Mode: wrap stdout so we can capture per-step emit chunks
+    tee: _TeeingWriter | None = None
+    if trace_hook is not None:
+        tee = _TeeingWriter(stdout)
+        stdout = tee  # type: ignore[assignment]
+
     dispatch = _build_dispatch_table(spec)
     grid = _Grid.from_source(source)
 
@@ -343,6 +351,19 @@ def run(
 
         cell = state.grid.cell(state.ip.x, state.ip.y)
 
+        # Witness snapshot — pre-state captured before any cell handling
+        _trace_pre = None
+        if trace_hook is not None:
+            _trace_pre = {
+                "step": steps,
+                "row": state.ip.y,
+                "col": state.ip.x,
+                "dir": state.ip.direction.name.lower(),
+                "cell": cell,
+                "string_mode": state.string_mode,
+                "stack_before": list(state.stack),
+            }
+
         # String mode short-circuit: every cell pushes its codepoint
         # except `"` which toggles back to op mode. The lookup against
         # the dispatch table is bypassed entirely while string mode is
@@ -354,6 +375,14 @@ def run(
             else:
                 state.stack.append(ord(cell))
             state.ip.advance(state.grid)
+            if trace_hook is not None and _trace_pre is not None:
+                _trace_pre["op"] = "string_mode_push" if state.string_mode else "string_mode_off"
+                _trace_pre["stack_after"] = list(state.stack)
+                _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+                _trace_pre["next_row"] = state.ip.y
+                _trace_pre["next_col"] = state.ip.x
+                _trace_pre["next_dir"] = state.ip.direction.name.lower()
+                trace_hook(_trace_pre)
             continue
 
         # Op-mode dispatch.
@@ -458,6 +487,14 @@ def run(
             state.ip.advance(state.grid)
 
         elif op == InstructionOp.HALT:
+            if trace_hook is not None and _trace_pre is not None:
+                _trace_pre["op"] = op.value
+                _trace_pre["stack_after"] = list(state.stack)
+                _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+                _trace_pre["next_row"] = state.ip.y
+                _trace_pre["next_col"] = state.ip.x
+                _trace_pre["next_dir"] = state.ip.direction.name.lower()
+                trace_hook(_trace_pre)
             return
 
         else:
@@ -467,3 +504,12 @@ def run(
             )
 
         state.ip.advance(state.grid)
+
+        if trace_hook is not None and _trace_pre is not None:
+            _trace_pre["op"] = op.value
+            _trace_pre["stack_after"] = list(state.stack)
+            _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+            _trace_pre["next_row"] = state.ip.y
+            _trace_pre["next_col"] = state.ip.x
+            _trace_pre["next_dir"] = state.ip.direction.name.lower()
+            trace_hook(_trace_pre)

@@ -87,8 +87,9 @@ from __future__ import annotations
 
 import sys
 from dataclasses import dataclass
-from typing import IO
+from typing import IO, Any, Callable
 
+from babel.interpreter import _TeeingWriter
 from babel.schema import (
     BaseMachine,
     InstructionOp,
@@ -232,6 +233,7 @@ def run(
     stdin: IO[str] | None = None,
     stdout: IO[str] | None = None,
     max_steps: int = 100_000,
+    trace_hook: Callable[[dict[str, Any]], None] | None = None,
 ) -> None:
     """Execute a Subleq ``source`` against ``spec``.
 
@@ -258,6 +260,12 @@ def run(
 
     stdin = stdin if stdin is not None else sys.stdin
     stdout = stdout if stdout is not None else sys.stdout
+
+    # Witness Mode: wrap stdout so we can capture per-step emit chunks
+    tee: _TeeingWriter | None = None
+    if trace_hook is not None:
+        tee = _TeeingWriter(stdout)
+        stdout = tee  # type: ignore[assignment]
 
     program = parse(source, spec)
     memory = program.memory
@@ -288,6 +296,18 @@ def run(
         a = memory[pc]
         b = memory[pc + 1]
         c = memory[pc + 2]
+
+        # Witness snapshot: pre-state captured before SUBLEQ fires
+        _trace_pre = None
+        if trace_hook is not None:
+            _trace_pre = {
+                "step": steps,
+                "pc": pc,
+                "op": "subleq",
+                "a": a, "b": b, "c": c,
+                "mem_a_before": memory[a] if (a >= 0 and a < len(memory)) else (0 if a >= 0 else None),
+                "mem_b_before": memory[b] if (b >= 0 and b < len(memory)) else (0 if b >= 0 else None),
+            }
 
         # SUBLEQ semantics (Babel dialect):
         # I/O takes operand-position precedence over the subtract:
@@ -321,6 +341,15 @@ def run(
             b_val = _read_cell(memory, b, shape=shape)
             new_b = b_val - a_val
             _write_cell(memory, b, new_b, shape=shape)
+
+        if trace_hook is not None and _trace_pre is not None:
+            _trace_pre["new_b"] = new_b
+            _trace_pre["mem_a_after"] = memory[a] if (a >= 0 and a < len(memory)) else (0 if a >= 0 else None)
+            _trace_pre["mem_b_after"] = memory[b] if (b >= 0 and b < len(memory)) else (0 if b >= 0 else None)
+            _trace_pre["jumped"] = (c >= 0 and new_b <= 0)
+            _trace_pre["next_pc"] = c if (c >= 0 and new_b <= 0) else (pc + 3)
+            _trace_pre["emit"] = tee.take_chunk() if tee is not None else ""
+            trace_hook(_trace_pre)
 
         if c < 0:
             # Halt convention: c < 0 stops the machine cleanly.
