@@ -1,0 +1,66 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Alphuck — a Brainfuck derivative that substitutes the eight canonical
+# instructions with eight single lowercase ASCII letters (a, c, e, i, j, o,
+# p, s). Plain letter-for-symbol substitution; pure vocabulary skin.
+#
+# Reference: https://esolangs.org/wiki/Alphuck
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells, ascii_punctuation
+# encoding (single-character tokens). All non-instruction characters are
+# treated as comments by Babel's ascii_punctuation tokenizer — matching the
+# reference impl's "all other characters are ignored" semantics.
+
+name: Alphuck
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose eight instructions are eight single lowercase
+  ASCII letters — *a*, *c*, *e*, *i*, *j*, *o*, *p*, *s*. Pure letter-for-
+  symbol substitution; no semantic additions over BF. Exemplifies the
+  cleanest possible vocabulary skin — same encoding shape as canonical BF
+  (single-character punctuation-stream), just with letters instead of
+  punctuation glyphs.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: ascii_punctuation
+io: character
+theme: alphabet-substitution
+source_extension: .alph
+
+instructions:
+  - token: "a"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "c"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "e"
+    op: increment
+    description: "Increment the byte at the data pointer."
+  - token: "i"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "j"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "o"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "p"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `s`."
+  - token: "s"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `p`."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: compact
+  playfulness: low
+  unpredictability: zero
+  naturalness: none

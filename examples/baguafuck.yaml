@@ -1,0 +1,69 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# BaguaFuck — a Brainfuck derivative whose surface tokens are the eight
+# Bagua trigrams of the I Ching (乾 / 兑 / 离 / 震 / 巽 / 坎 / 艮 / 坤). Each
+# trigram is a single Unicode codepoint; sources are written as consecutive
+# trigrams with no separator, mirroring canonical BF's punctuation-stream
+# convention.
+#
+# Reference: https://esolangs.org/wiki/BaguaFuck
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded (the reference impl describes a
+# "bilaterally infinite catena of unsigned byte-valued cells") + byte cells
+# (8-bit unsigned with wrapping). Encoding is ascii_punctuation — Babel's
+# single-character tokenizer iterates the source by Unicode codepoint, so
+# non-ASCII single-character tokens like 乾 work natively without any
+# tokenizer changes. Cleanly demonstrates the Unicode axis.
+
+name: BaguaFuck
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose eight instructions are the Bagua trigrams of
+  the I Ching — 乾 (Heaven), 兑 (Lake), 离 (Fire), 震 (Thunder), 巽 (Wind),
+  坎 (Water), 艮 (Mountain), 坤 (Earth). Sources are written as adjacent
+  trigrams without whitespace, mirroring canonical BF's punctuation-stream
+  syntax. No semantic additions over BF; a clean Unicode-skin exemplar.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: ascii_punctuation
+io: character
+theme: iching-trigrams
+source_extension: .bagua
+
+instructions:
+  - token: "乾"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right (Heaven / Qián)."
+  - token: "兑"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left (Lake / Duì)."
+  - token: "离"
+    op: increment
+    description: "Increment the byte at the data pointer (Fire / Lí)."
+  - token: "震"
+    op: decrement
+    description: "Decrement the byte at the data pointer (Thunder / Zhèn)."
+  - token: "巽"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character (Wind / Xùn)."
+  - token: "坎"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer (Water / Kǎn)."
+  - token: "艮"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching 坤 (Mountain / Gèn)."
+  - token: "坤"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching 艮 (Earth / Kūn)."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: medium
+  playfulness: moderate
+  unpredictability: zero
+  naturalness: none

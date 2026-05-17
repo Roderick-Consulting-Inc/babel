@@ -1,0 +1,72 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Pikalang — a Brainfuck derivative whose surface tokens are eight syllables
+# from the vocabulary of Pikachu (the Pokémon mascot) — `pi`, `ka`, `pika`,
+# `pikachu`, `pichu`, `pipi`, `pikapi`, `chu`. The wiki specifies whitespace-
+# separated tokens.
+#
+# Note on prefix overlap: `pi` is a prefix of `pichu` and `pipi`; `pika` is a
+# prefix of `pikachu` and `pikapi`. This is only ambiguous when the source is
+# concatenated without separators. Because the wiki's source format is
+# whitespace-separated, the tokenizer can match atom-by-atom (no longest-
+# match needed), so Babel's single-atom whitespace path handles Pikalang
+# without any special casing.
+#
+# Reference: https://esolangs.org/wiki/Pikalang
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells, whitespace-separated
+# tokens, all lowercase single-atom Pokémon-syllable words.
+
+name: Pikalang
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose eight instructions are syllables from the
+  vocabulary of Pikachu — *pi*, *ka*, *pika*, *pikachu*, *pichu*, *pipi*,
+  *pikapi*, *chu*. Whitespace-separated tokens; no semantic additions over
+  BF. The tokens contain prefix overlaps (`pi` ⊂ `pikapi`, `pika` ⊂
+  `pikachu`), but because the wiki specifies whitespace-separated source the
+  tokenizer matches atom-by-atom and the overlap is moot.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+theme: pokemon-vocabulary
+source_extension: .pika
+
+instructions:
+  - token: "pipi"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "pichu"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "pi"
+    op: increment
+    description: "Increment the byte at the data pointer."
+  - token: "ka"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "pikachu"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "pikapi"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "pika"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `chu`."
+  - token: "chu"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `pika`."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: medium
+  playfulness: high
+  unpredictability: zero
+  naturalness: vocabulary

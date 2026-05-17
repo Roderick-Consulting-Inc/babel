@@ -2,6 +2,25 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.3.2] — 2026-05-17
+
+### Added — GERMAN + BaguaFuck + Pikalang + Alphuck parameter sheets
+
+Four new parameter sheets ship in this release, no runtime changes. All four were flagged as Path A (no runtime work required) by the [BF-family interpreter-candidates survey](research-notes/interpreter-candidates-2026-05-17.md):
+
+- **`examples/german.yaml`** — GERMAN, a 2014 trivial BF substitution by User:domi382 using all-caps German nouns (*LINKS*, *RECHTS*, *ADDITION*, *SUBTRAKTION*, *EINGABE*, *AUSGABE*, *SCHLEIFENANFANG*, *SCHLEIFENENDE*). Single-atom whitespace-separated tokens. Methodological exemplar of a non-Spanish, non-English natural-language skin — broadens Babel's "naturalness" axis to a third register beyond English (Ook!) and Spanish (Mierda / Chespirito / Rioplatense).
+- **`examples/baguafuck.yaml`** — BaguaFuck, whose eight instructions are the Bagua trigrams of the I Ching (乾 / 兑 / 离 / 震 / 巽 / 坎 / 艮 / 坤). Single Unicode-codepoint tokens written adjacently without separators. Uses `ascii_punctuation` encoding — Babel's single-character tokenizer iterates the source by Unicode codepoint, so non-ASCII single-character tokens work natively without any tokenizer changes. Clean Unicode-axis exemplar.
+- **`examples/pikalang.yaml`** — Pikalang, eight Pokémon-syllable tokens (*pipi*, *pichu*, *pi*, *ka*, *pikachu*, *pikapi*, *pika*, *chu*). The tokens contain prefix overlaps (`pi` ⊂ `pikapi`, `pika` ⊂ `pikachu`), but because the wiki specifies whitespace-separated source, atom-by-atom matching is unambiguous and Babel's single-atom fast path handles it without longest-match logic.
+- **`examples/alphuck.yaml`** — Alphuck, plain letter-for-symbol substitution: eight single lowercase ASCII letters (*a*, *c*, *e*, *i*, *j*, *o*, *p*, *s*) replace the eight BF punctuation glyphs. Same encoding shape as canonical BF; exercises `ascii_punctuation` with alphabetic single-char tokens.
+
+#### Tests
+
+- `tests/test_german.py` — 4 tests including Hello World end-to-end and case-sensitivity check.
+- `tests/test_baguafuck.py` — 3 tests including Hello World end-to-end and Unicode codepoint assertions.
+- `tests/test_pikalang.py` — 4 tests including Hello World end-to-end and a prefix-overlap disambiguation check.
+- `tests/test_alphuck.py` — 4 tests including Hello World end-to-end and comment-skip behaviour.
+- All previous tests still pass (39 → 54 total).
+
 ## [0.3.1] — 2026-05-17
 
 ### Added — Chespirito + Mierda parameter sheets (completes the Spanish-language BF trio)
