@@ -94,6 +94,9 @@ class Encoding(str, Enum):
     UNARY = "unary"
     BINARY = "binary"
     TWO_DIMENSIONAL_GRID = "two_dimensional_grid"
+    # v0.2.0 additions surfaced by the 2026-05-17 interpreter-candidates survey.
+    VARIABLE_LENGTH_BINARY = "variable_length_binary"  # Huffman-style; e.g. Spoon
+    WORD_LENGTH_DISPATCH = "word_length_dispatch"  # Word-length selects op; e.g. Wordfuck
 
 
 class IOModel(str, Enum):
@@ -135,6 +138,12 @@ class InstructionOp(str, Enum):
     RANDOM = "random"  # Chespirito
     DEBUG = "debug"
 
+    # v0.2.0 additions surfaced by the 2026-05-17 interpreter-candidates survey.
+    # See research-notes/interpreter-candidates-2026-05-17.md (§ "Schema gaps").
+    HALT = "halt"  # Explicit program termination (Spoon, La Weá)
+    BREAK_LOOP = "break_loop"  # Exit innermost enclosing loop (Brainlove); interpreter NotImplementedError pending runtime support
+    JUMP_UNCONDITIONAL = "jump_unconditional"  # Unconditional jump to label/target (La Weá); interpreter NotImplementedError pending operand-slot support
+
 
 # Operations that are only valid on a Brainfuck-tape base machine.
 _TAPE_OPS: frozenset[InstructionOp] = frozenset(
@@ -154,6 +163,28 @@ _TAPE_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.CLIPBOARD_RECALL,
         InstructionOp.RANDOM,
         InstructionOp.DEBUG,
+        InstructionOp.HALT,
+        InstructionOp.BREAK_LOOP,
+        InstructionOp.JUMP_UNCONDITIONAL,
+    }
+)
+
+# Ops that move the tape pointer. A tape language must have at least one.
+_TAPE_MOBILITY_OPS: frozenset[InstructionOp] = frozenset(
+    {InstructionOp.PTR_RIGHT, InstructionOp.PTR_LEFT}
+)
+
+# Ops that modify the cell under the pointer. A tape language must have at least one.
+_TAPE_CELL_MODIFY_OPS: frozenset[InstructionOp] = frozenset(
+    {
+        InstructionOp.INCREMENT,
+        InstructionOp.DECREMENT,
+        InstructionOp.ZERO,
+        InstructionOp.HALVE,
+        InstructionOp.DOUBLE,
+        InstructionOp.CLIPBOARD_RECALL,
+        InstructionOp.RANDOM,
+        InstructionOp.INPUT,  # INPUT replaces the cell, counts as a modifier
     }
 )
 
@@ -374,27 +405,55 @@ class LanguageSpec(BaseModel):
 
     @model_validator(mode="after")
     def _check_brainfuck_tape_completeness(self) -> LanguageSpec:
-        """A Brainfuck-tape language must define all eight canonical ops.
+        """A Brainfuck-tape language must have a viable minimum op set.
 
-        Subsetting (e.g., Boolfuck removing certain ops) is left as a
-        future schema extension; for the vertical slice we require the
-        full canonical set so the interpreter has well-defined semantics.
+        v0.2.0 relaxes the prior all-eight-canonical-ops requirement so
+        subsetting languages like Boolfuck (no separate DECREMENT — `+`
+        toggles the bit) and Smallfuck (no I/O at all) validate. The
+        new minimum bar is:
+
+        * At least one pointer-moving op (PTR_RIGHT or PTR_LEFT).
+        * At least one cell-modifying op (INCREMENT, DECREMENT, ZERO,
+          HALVE, DOUBLE, CLIPBOARD_RECALL, RANDOM, or INPUT).
+        * LOOP_START and LOOP_END both present, or both absent
+          (the parser's bracket matching depends on this).
+        * Any defined op must still be in the tape-legal set.
+
+        I/O is no longer required (Smallfuck has none).
         """
         if self.base_machine != BaseMachine.BRAINFUCK_TAPE:
             return self
         defined_ops = {i.op for i in self.instructions}
-        missing = _CANONICAL_BF_OPS - defined_ops
-        if missing:
-            raise ValueError(
-                "brainfuck_tape language is missing canonical operations: "
-                f"{sorted(o.value for o in missing)}"
-            )
-        # Any extra ops must still be from the tape-legal set.
+
+        # Extras must still be from the tape-legal set.
         extras = defined_ops - _TAPE_OPS
         if extras:
             raise ValueError(
                 "brainfuck_tape language defines operations that don't apply to a tape "
                 f"machine: {sorted(o.value for o in extras)}"
+            )
+
+        # Mobility: at least one pointer-moving op.
+        if not (defined_ops & _TAPE_MOBILITY_OPS):
+            raise ValueError(
+                "brainfuck_tape language must define at least one pointer-moving op "
+                f"({sorted(o.value for o in _TAPE_MOBILITY_OPS)})"
+            )
+
+        # Cell modification: at least one cell-modifying op.
+        if not (defined_ops & _TAPE_CELL_MODIFY_OPS):
+            raise ValueError(
+                "brainfuck_tape language must define at least one cell-modifying op "
+                f"({sorted(o.value for o in _TAPE_CELL_MODIFY_OPS)})"
+            )
+
+        # Balanced loops: both or neither.
+        has_start = InstructionOp.LOOP_START in defined_ops
+        has_end = InstructionOp.LOOP_END in defined_ops
+        if has_start != has_end:
+            raise ValueError(
+                "brainfuck_tape language must define both LOOP_START and LOOP_END, "
+                f"or neither; got LOOP_START={has_start}, LOOP_END={has_end}"
             )
         return self
 

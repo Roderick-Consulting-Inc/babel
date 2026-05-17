@@ -324,6 +324,28 @@ def run(
                 f"tape={state.cells[:max(state.ptr + 4, 8)]}]\n"
             )
 
+        elif op == InstructionOp.HALT:
+            # Explicit program termination. Used by Spoon, La Weá.
+            return
+
+        elif op == InstructionOp.BREAK_LOOP:
+            # Exit innermost enclosing loop (Brainlove-style). Needs
+            # runtime loop-stack tracking that the current parser doesn't
+            # build; deferred until that lands.
+            raise InterpreterError(
+                "break_loop op is not yet implemented in the interpreter "
+                "(schema accepts it for parameter-sheet authoring; runtime "
+                "support is a follow-up)"
+            )
+
+        elif op == InstructionOp.JUMP_UNCONDITIONAL:
+            # Unconditional jump to a target. Needs the Instruction
+            # operand slot, which is a separate schema extension.
+            raise InterpreterError(
+                "jump_unconditional op is not yet implemented in the interpreter "
+                "(needs the Instruction operand-slot extension; deferred)"
+            )
+
         else:
             raise InterpreterError(f"unhandled op {op.value}")
 
