@@ -2,6 +2,32 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.5.2] — 2026-05-17
+
+### Added — `BREAK_LOOP` runtime (La Weá's `pico` fully working)
+
+Closes the last stub op in the BF-tape interpreter. `BREAK_LOOP` was added to the schema in v0.2.0 but interpreted as a not-yet-implemented stub since then; v0.5.2 implements La Weá's `pico` semantic: at runtime, scan the parsed-op stream forward from the current `pc` for the nearest `LOOP_END`, set `pc` to that position, and let the bottom-of-loop `pc += 1` advance past it. Programs without any `LOOP_END` after the `BREAK_LOOP` surface a clear `InterpreterError`.
+
+The semantic deliberately matches La Weá's wiki ("regardless of current cell value", finds nearest *following* `tula`) — it doesn't track loop nesting at runtime. A future variant of `BREAK_LOOP` with proper innermost-open-loop semantics (Brainlove-style) would need a runtime loop stack and a new op value; this implementation matches La Weá specifically.
+
+#### Changed
+
+- **`test_break_loop_raises_not_yet_implemented` → `test_break_loop_jumps_to_next_loop_end`** — the stub-raising test becomes a real behavioural test.
+- **`test_la_wea_pico_raises_not_yet_implemented` → `test_la_wea_pico_jumps_out_of_loop`** — same; La Weá's `pico` now executes end-to-end.
+
+#### Tests
+
+- 1 new `test_break_loop_without_loop_end_raises` covering the error path.
+- All 111 previously-passing v0.5.1 tests still pass (111 → 112 total).
+
+#### La Weá op coverage: 16/16
+
+With `BREAK_LOOP` runtime in place, all sixteen La Weá ops execute end-to-end. The Chilean-Spanish BF entry is now fully runnable.
+
+#### Stub ops remaining in the schema
+
+None on the BF-tape side. Encoding-tokenizer stubs remain for `VARIABLE_LENGTH_BINARY` (Spoon) and `WORD_LENGTH_DISPATCH` (Wordfuck); those are tokenizer extensions, not new ops.
+
 ## [0.5.1] — 2026-05-17
 
 ### Added — La Weá parameter sheet + 5 tape ops to support it

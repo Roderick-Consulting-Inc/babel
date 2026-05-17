@@ -476,14 +476,32 @@ def run(
             return
 
         elif op == InstructionOp.BREAK_LOOP:
-            # Exit innermost enclosing loop (Brainlove-style). Needs
-            # runtime loop-stack tracking that the current parser doesn't
-            # build; deferred until that lands.
-            raise InterpreterError(
-                "break_loop op is not yet implemented in the interpreter "
-                "(schema accepts it for parameter-sheet authoring; runtime "
-                "support is a follow-up)"
-            )
+            # v0.5.2: La Weá's `pico` semantic — "move instruction pointer
+            # after closest following tula command, regardless of current
+            # cell value." Equivalently: scan forward through the parsed
+            # op stream until we find the next LOOP_END, then set pc to
+            # that position; the bottom-of-loop ``pc += 1`` will advance
+            # past it. If no LOOP_END follows, raise InterpreterError so
+            # that the misuse is surfaced rather than silently terminating.
+            #
+            # Note: the semantic deliberately ignores nesting. If the
+            # program is `[ pico ]`, `pico` jumps to the `]` of the
+            # enclosing loop, exiting it. If the program is
+            # `pico ... ]` (pico outside any loop), it still jumps to the
+            # next `]` — that's the literal La Weá specification. Future
+            # variants (Brainlove-style "exit only the innermost open
+            # loop") would need a runtime loop stack and a different op
+            # value; this implementation matches La Weá specifically.
+            next_loop_end = None
+            for k in range(pc + 1, len(ops)):
+                if ops[k] == InstructionOp.LOOP_END:
+                    next_loop_end = k
+                    break
+            if next_loop_end is None:
+                raise InterpreterError(
+                    "break_loop reached but no loop_end follows in the program"
+                )
+            pc = next_loop_end  # bottom-of-loop pc += 1 advances past the LOOP_END
 
         elif op == InstructionOp.JUMP_UNCONDITIONAL:
             # v0.5.0: unconditional jump to the operand-specified absolute pc.

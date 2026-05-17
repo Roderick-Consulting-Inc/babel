@@ -149,8 +149,15 @@ def test_la_wea_mierda_halt() -> None:
     assert out.getvalue() == "\x01"
 
 
-def test_la_wea_pico_raises_not_yet_implemented() -> None:
-    """`pico` (BREAK_LOOP) is schema-legal but the runtime stub raises clearly."""
+def test_la_wea_pico_jumps_out_of_loop() -> None:
+    """v0.5.2: `pico` jumps to the position after the nearest following `tula`.
+
+    Program: `weón pichula pico weón ctm tula weón ctm`
+    Op stream: INCREMENT, LOOP_START, BREAK_LOOP, INCREMENT, OUTPUT, LOOP_END, INCREMENT, OUTPUT
+    Same trace as `test_break_loop_jumps_to_next_loop_end` — the in-loop
+    `weón ctm` is skipped; the post-loop `weón ctm` emits '\\x02'.
+    """
     spec = load_spec(EXAMPLES / "brainfuck-la-wea.yaml")
-    with pytest.raises(InterpreterError, match="break_loop"):
-        run("weón pichula pico tula", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+    out = io.StringIO()
+    run("weón pichula pico weón ctm tula weón ctm", spec, stdin=io.StringIO(""), stdout=out)
+    assert out.getvalue() == "\x02"

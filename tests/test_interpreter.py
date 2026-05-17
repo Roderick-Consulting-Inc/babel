@@ -108,8 +108,19 @@ def test_halt_in_program_without_output_after() -> None:
     assert out.getvalue() == ""
 
 
-def test_break_loop_raises_not_yet_implemented() -> None:
-    """BREAK_LOOP is schema-legal but interpreter raises (deferred runtime work)."""
+def test_break_loop_jumps_to_next_loop_end() -> None:
+    """v0.5.2: BREAK_LOOP (La Weá's `pico`) jumps to nearest following LOOP_END.
+
+    Program: `+[b+.]+.`
+    Op stream: INCREMENT, LOOP_START, BREAK_LOOP, INCREMENT, OUTPUT, LOOP_END, INCREMENT, OUTPUT
+    Runtime trace:
+      pc=0 INCREMENT       cell=1
+      pc=1 LOOP_START      cell≠0 → enter loop
+      pc=2 BREAK_LOOP      jump to next LOOP_END (pc=5); bottom-of-loop pc+=1 → pc=6
+      pc=6 INCREMENT       cell=2
+      pc=7 OUTPUT          emit '\\x02'
+    Expected output: '\\x02' (the in-loop INCREMENT and OUTPUT are skipped).
+    """
     spec = LanguageSpec(
         name="break-test",
         base_machine=BaseMachine.BRAINFUCK_TAPE,
@@ -120,13 +131,34 @@ def test_break_loop_raises_not_yet_implemented() -> None:
             Instruction(token="<", op=InstructionOp.PTR_LEFT),
             Instruction(token="+", op=InstructionOp.INCREMENT),
             Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token=".", op=InstructionOp.OUTPUT),
             Instruction(token="[", op=InstructionOp.LOOP_START),
             Instruction(token="]", op=InstructionOp.LOOP_END),
             Instruction(token="b", op=InstructionOp.BREAK_LOOP),
         ],
     )
-    with pytest.raises(InterpreterError, match="break_loop"):
-        run("+[b]", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+    out = io.StringIO()
+    run("+[b+.]+.", spec, stdin=io.StringIO(""), stdout=out)
+    assert out.getvalue() == "\x02"
+
+
+def test_break_loop_without_loop_end_raises() -> None:
+    """BREAK_LOOP with no following LOOP_END surfaces a clear error."""
+    spec = LanguageSpec(
+        name="break-no-end",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.ASCII_PUNCTUATION,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token="b", op=InstructionOp.BREAK_LOOP),
+        ],
+    )
+    with pytest.raises(InterpreterError, match="no loop_end follows"):
+        run("+b", spec, stdin=io.StringIO(""), stdout=io.StringIO())
 
 
 def test_jump_unconditional_executes_with_arity_one() -> None:
