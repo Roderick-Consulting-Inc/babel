@@ -2,6 +2,34 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.5.1] — 2026-05-17
+
+### Added — La Weá parameter sheet + 5 tape ops to support it
+
+The Chilean Spanish entry in the Spanish-language BF coverage matrix. Completes the four-register set: Argentine (Rioplatense), Mexican (Chespirito), peninsular (Mierda), Chilean (La Weá) — one parameter-sheet schema, four registers.
+
+#### Added
+
+- **5 new `InstructionOp` values** to express La Weá's signature extras (all tape-legal):
+  - `INCREMENT_BY_2` — La Weá's `aweonao` (+2 in one op)
+  - `DECREMENT_BY_2` — La Weá's `maraco` (-2 in one op)
+  - `CLIPBOARD_TOGGLE` — La Weá's `perkin` (stateful: empty → store + mark full; full → recall + clear)
+  - `OUTPUT_INT` — La Weá's `chúpala` (emit cell as decimal integer, ignoring spec-wide `IOModel`)
+  - `INPUT_INT` — La Weá's `brígido` (read decimal integer into cell, ignoring spec-wide `IOModel`)
+- **`_TapeState.clipboard_filled: bool`** — runtime flag backing `CLIPBOARD_TOGGLE`'s stateful semantics. Existing `CLIPBOARD_STORE` / `CLIPBOARD_RECALL` (single-direction ops) are unchanged.
+- **Tape interpreter handlers** for all five new ops; cell-width wrap behaviour matches the existing arithmetic ops (BYTE mod 256, etc.).
+- **`_TAPE_OPS`** and **`_TAPE_CELL_MODIFY_OPS`** frozensets in `schema.py` updated to include the new ops where appropriate. No new validators.
+- **`examples/brainfuck-la-wea.yaml`** — 16 tokens, the full La Weá op set. 15 of 16 execute end-to-end; the 16th (`pico` → `BREAK_LOOP`) is schema-legal but the runtime stub raises `InterpreterError` until the BF-tape loop-stack runtime extension lands (documented in the YAML and tested explicitly).
+
+#### Tests
+
+- 10 new `tests/test_la_wea.py` tests: spec loads with all 16 ops; canonical BF Hello World transliterated to La Weá runs to `Hello World!\n`; per-op tests for `aweonao` (+2), `maraco` (-2 wraps to 254 on byte), `maraca` (zero), `chúpala` (integer output), `brígido` (integer input), `perkin` (toggle copy/paste), `mierda` (halt); `pico` raises the expected runtime stub.
+- All 101 previously-passing v0.5.0 tests still pass (101 → 111 total).
+
+#### What still needs runtime work
+
+The only La Weá op without a runtime is `pico` → `BREAK_LOOP`. The op semantics ("jump to position after nearest following `tula`") require a runtime loop-stack rather than operand-consumption; orthogonal to the v0.5.0 operand-aware tokenizer work. La Weá parameter sheets without `pico` are fully runnable today; `pico`-using programs surface a clear runtime error.
+
 ## [0.5.0] — 2026-05-17
 
 ### Added — BF-tape arity-aware tokenizer + `JUMP_UNCONDITIONAL` runtime

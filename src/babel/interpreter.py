@@ -257,6 +257,7 @@ class _TapeState:
     cells: list[int]
     ptr: int
     clipboard: int = 0  # only used when CLIPBOARD_* ops are present
+    clipboard_filled: bool = False  # used by CLIPBOARD_TOGGLE (La Weá's `perkin`)
 
 
 def _new_tape(spec: LanguageSpec, bounded_size: int = 30000) -> _TapeState:
@@ -418,6 +419,44 @@ def run(
 
         elif op == InstructionOp.CLIPBOARD_RECALL:
             state.cells[state.ptr] = state.clipboard
+
+        elif op == InstructionOp.CLIPBOARD_TOGGLE:
+            # La Weá's `perkin`: stateful single-op copy/paste. If the buffer
+            # is empty, capture the current cell and mark filled. If the buffer
+            # is full, paste it back into the current cell and clear the buffer.
+            if state.clipboard_filled:
+                state.cells[state.ptr] = state.clipboard
+                state.clipboard = 0
+                state.clipboard_filled = False
+            else:
+                state.clipboard = state.cells[state.ptr]
+                state.clipboard_filled = True
+
+        elif op == InstructionOp.INCREMENT_BY_2:
+            state.cells[state.ptr] = _wrap_cell(state.cells[state.ptr] + 2, modulus)
+
+        elif op == InstructionOp.DECREMENT_BY_2:
+            state.cells[state.ptr] = _wrap_cell(state.cells[state.ptr] - 2, modulus)
+
+        elif op == InstructionOp.OUTPUT_INT:
+            # La Weá's `chúpala`: emit the current cell as a decimal integer,
+            # ignoring the spec's IOModel (a spec can mix character `OUTPUT`
+            # and integer `OUTPUT_INT` in one program — La Weá does).
+            stdout.write(str(state.cells[state.ptr]))
+            stdout.flush() if hasattr(stdout, "flush") else None
+
+        elif op == InstructionOp.INPUT_INT:
+            # La Weá's `brígido`: read one decimal integer from stdin into
+            # the current cell. Trailing newline tolerated; non-integer
+            # input raises InterpreterError.
+            line = stdin.readline().strip()
+            if line == "":
+                pass  # EOF: leave cell unchanged
+            else:
+                try:
+                    state.cells[state.ptr] = _wrap_cell(int(line), modulus)
+                except ValueError as e:
+                    raise InterpreterError(f"input_int expected integer, got {line!r}") from e
 
         elif op == InstructionOp.RANDOM:
             if modulus is None:

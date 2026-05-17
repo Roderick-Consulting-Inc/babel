@@ -142,7 +142,17 @@ class InstructionOp(str, Enum):
     # See research-notes/interpreter-candidates-2026-05-17.md (§ "Schema gaps").
     HALT = "halt"  # Explicit program termination (Spoon, La Weá)
     BREAK_LOOP = "break_loop"  # Exit innermost enclosing loop (Brainlove); interpreter NotImplementedError pending runtime support
-    JUMP_UNCONDITIONAL = "jump_unconditional"  # Unconditional jump to label/target (La Weá); interpreter NotImplementedError pending operand-slot support
+    JUMP_UNCONDITIONAL = "jump_unconditional"  # Absolute-pc unconditional jump (arity=1); runtime landed in v0.5.0
+
+    # v0.5.1 additions for La Weá and adjacent BF derivatives. Five small
+    # tape-family ops that surfaced as gaps when writing the La Weá sheet:
+    # the +2/-2 variants `aweonao`/`maraco`, the toggle-buffer op `perkin`,
+    # and the integer-mode I/O pair `chúpala`/`brígido`.
+    INCREMENT_BY_2 = "increment_by_2"  # cell += 2 (La Weá's `aweonao`)
+    DECREMENT_BY_2 = "decrement_by_2"  # cell -= 2 (La Weá's `maraco`)
+    CLIPBOARD_TOGGLE = "clipboard_toggle"  # Stateful: if buffer empty store + mark full; if full recall + clear (La Weá's `perkin`)
+    OUTPUT_INT = "output_int"  # Emit cell as decimal integer, regardless of IOModel (La Weá's `chúpala`)
+    INPUT_INT = "input_int"  # Read decimal integer from stdin, regardless of IOModel (La Weá's `brígido`)
 
     # v0.4.0 — stack-machine ops (Path B; first non-tape base machine).
     # See research-notes/interpreter-candidates-2026-05-17.md (§ "Stack-machine
@@ -187,6 +197,11 @@ _TAPE_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.HALT,
         InstructionOp.BREAK_LOOP,
         InstructionOp.JUMP_UNCONDITIONAL,
+        InstructionOp.INCREMENT_BY_2,
+        InstructionOp.DECREMENT_BY_2,
+        InstructionOp.CLIPBOARD_TOGGLE,
+        InstructionOp.OUTPUT_INT,
+        InstructionOp.INPUT_INT,
     }
 )
 
@@ -204,8 +219,12 @@ _TAPE_CELL_MODIFY_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.HALVE,
         InstructionOp.DOUBLE,
         InstructionOp.CLIPBOARD_RECALL,
+        InstructionOp.CLIPBOARD_TOGGLE,
         InstructionOp.RANDOM,
         InstructionOp.INPUT,  # INPUT replaces the cell, counts as a modifier
+        InstructionOp.INPUT_INT,
+        InstructionOp.INCREMENT_BY_2,
+        InstructionOp.DECREMENT_BY_2,
     }
 )
 

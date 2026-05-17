@@ -1,0 +1,111 @@
+# La Weá — a Brainfuck derivative whose surface tokens are Chilean Spanish
+# slang. Pure vocabulary skin on a tape machine, with extras: explicit
+# `+2`/`-2` cells (`aweonao`/`maraco`), a toggle-style copy/paste buffer
+# (`perkin`), integer-mode I/O (`chúpala`/`brígido`), an unconditional
+# loop-break (`pico`), and an explicit halt (`mierda`).
+#
+# Reference: https://esolangs.org/wiki/La_We%C3%A1
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells; whitespace-
+# separated single-atom tokens. Sixteen instructions total:
+#
+#   * 8 canonical BF ops          — weón, maricón, chucha, puta, pichula,
+#                                   tula, ctm, quéweá
+#   * ZERO                        — maraca
+#   * HALT                        — mierda (v0.2.0 op)
+#   * INCREMENT_BY_2              — aweonao (v0.5.1 op)
+#   * DECREMENT_BY_2              — maraco (v0.5.1 op)
+#   * CLIPBOARD_TOGGLE            — perkin (v0.5.1 op)
+#   * OUTPUT_INT                  — chúpala (v0.5.1 op)
+#   * INPUT_INT                   — brígido (v0.5.1 op)
+#   * BREAK_LOOP                  — pico (declared schema-legal but
+#                                         interpreter raises a clear
+#                                         "not yet implemented" until the
+#                                         runtime loop-stack lands; see
+#                                         the v0.2.0 changelog note)
+#
+# Completes the Spanish-language BF coverage matrix: Argentine
+# (Rioplatense), Mexican (Chespirito), peninsular (Mierda), and Chilean
+# (La Weá) — four registers, one parameter-sheet schema.
+
+name: La Weá
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose surface tokens are Chilean Spanish slang
+  words (some explicit). The op set extends canonical BF with `+2`/`-2`
+  shortcuts (*aweonao* / *maraco*), a toggle-style copy/paste buffer
+  (*perkin*), integer-mode I/O (*chúpala* / *brígido*), an unconditional
+  loop-break (*pico*), and an explicit halt (*mierda*).
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+theme: chilean-slang
+source_extension: .lawea
+
+instructions:
+  - token: "weón"
+    op: increment
+    description: "Increment the byte at the data pointer by 1."
+  - token: "aweonao"
+    op: increment_by_2
+    description: "Increment the byte at the data pointer by 2."
+  - token: "maricón"
+    op: decrement
+    description: "Decrement the byte at the data pointer by 1."
+  - token: "maraco"
+    op: decrement_by_2
+    description: "Decrement the byte at the data pointer by 2."
+  - token: "maraca"
+    op: zero
+    description: "Set the byte at the data pointer to zero."
+  - token: "chucha"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "puta"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "pichula"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `tula`."
+  - token: "tula"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `pichula`."
+  - token: "pico"
+    op: break_loop
+    description: |
+      Unconditional jump to the position after the nearest following `tula`.
+      Schema-legal in Babel v0.5.1; the runtime currently raises
+      `InterpreterError` ("break_loop op is not yet implemented") if exercised.
+      Implementation lands with the BF-tape runtime loop-stack extension.
+  - token: "ctm"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "quéweá"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "chúpala"
+    op: output_int
+    description: "Print the cell at the data pointer as a decimal integer."
+  - token: "brígido"
+    op: input_int
+    description: "Read a decimal integer from stdin into the cell at the data pointer."
+  - token: "perkin"
+    op: clipboard_toggle
+    description: |
+      Stateful copy/paste buffer. If the buffer is empty, copy the current
+      cell into it and mark it full. If the buffer is full, paste it back
+      into the current cell and clear the buffer.
+  - token: "mierda"
+    op: halt
+    description: "Terminate the program immediately."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: verbose
+  playfulness: high
+  unpredictability: zero
+  naturalness: vocabulary
