@@ -240,12 +240,32 @@ class Instruction(BaseModel):
     ``token`` is the literal string the source code uses; ``op`` is the
     canonical operation the interpreter dispatches on. ``description`` is
     optional human-readable text for the spec page.
+
+    ``arity`` (v0.3.3 — the *operand-slot extension* deferred from v0.2.0)
+    is the number of additional whitespace-separated source atoms the
+    interpreter should consume *after* this token as runtime operands.
+    Default 0 covers every Brainfuck-tape op. Non-zero values describe
+    languages like Subleq (single op, arity=3 for `SUBLEQ a b c` triples)
+    and Minsky counter-machines (arity=1 for `INC R1`, arity=2 for
+    `DEC R1 label`). The interpreter is responsible for parsing the
+    consumed atoms; the schema only validates that arity is non-negative
+    and that tape specs leave it at 0 (the BF-tape interpreter has no
+    operand-consumption machinery).
     """
 
     model_config = ConfigDict(frozen=True)
 
     token: str = Field(..., min_length=1, description="Surface token in the source language.")
     op: InstructionOp = Field(..., description="Canonical operation this token performs.")
+    arity: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Number of additional source atoms consumed after this token as "
+            "runtime operands. Default 0 for tape ops; non-zero for OISC, "
+            "register, and other operand-bearing families."
+        ),
+    )
     description: str | None = Field(
         default=None, description="Human-readable description for the spec page."
     )
@@ -467,6 +487,27 @@ class LanguageSpec(BaseModel):
             raise ValueError(
                 f"fungeoid_2d base machine requires encoding=two_dimensional_grid, "
                 f"got {self.encoding.value}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_tape_arity_is_zero(self) -> LanguageSpec:
+        """Brainfuck-tape interpreter has no operand-consumption machinery.
+
+        A tape spec that sets ``arity > 0`` on any instruction would cause
+        the tape interpreter to misbehave (the operand atoms would be
+        re-interpreted as instruction tokens on the next pc step). Reject
+        at validation time. Non-tape specs are free to use arity > 0; the
+        non-tape interpreters that consume them will land with the OISC
+        and stack-machine extensions.
+        """
+        if self.base_machine != BaseMachine.BRAINFUCK_TAPE:
+            return self
+        non_zero = [(i.token, i.arity) for i in self.instructions if i.arity > 0]
+        if non_zero:
+            raise ValueError(
+                "brainfuck_tape language must have arity=0 on every instruction; "
+                f"got non-zero arity on: {non_zero}"
             )
         return self
 

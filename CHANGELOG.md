@@ -2,6 +2,35 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.3.3] — 2026-05-17
+
+### Added — `Instruction.arity` field (operand-slot extension deferred from v0.2.0)
+
+Closes the fourth and last schema gap surfaced by the [BF-family interpreter-candidates survey](research-notes/interpreter-candidates-2026-05-17.md): the `Instruction` model gains an `arity: int = 0` field describing how many additional whitespace-separated source atoms the interpreter should consume *after* this token as runtime operands.
+
+The field is schema-level only — the interpreter doesn't consume operands yet, because Babel's only base-machine runtime today is `brainfuck_tape` and BF-tape ops have arity 0 by definition. The arity field lands here as the foundation for the planned OISC (Subleq) and register-machine extensions, plus stack-machine literal-pushes — all of which need to enumerate per-token operand counts at parameter-sheet authoring time. It also unblocks the deferred runtime semantics for `JUMP_UNCONDITIONAL` (added schema-only in v0.2.0).
+
+#### Added
+
+- **`Instruction.arity: int`** with `default=0`, `ge=0` validation, and human-readable docstring covering the Subleq (`SUBLEQ a b c`, arity 3) and Minsky (`INC R1` arity 1; `DEC R1 label` arity 2) shapes.
+
+#### Changed
+
+- **`LanguageSpec._check_tape_arity_is_zero`** — new cross-field validator that rejects any tape spec setting `arity > 0` on any instruction. The BF-tape interpreter has no operand-consumption machinery; if it processed an operand atom as the next instruction token, behaviour would silently corrupt. Validation at schema time surfaces the misuse immediately. Backward-compatible: every existing tape sheet has implicit `arity=0` everywhere.
+
+#### Tests
+
+- 7 new `tests/test_instruction_arity.py` tests: default arity is 0; existing BF specs unchanged; negative arity rejected; explicit `arity=0` accepted; tape specs reject non-zero arity; OISC-shaped (Subleq, arity 3) and register-shaped (Minsky, mixed arities) specs validate at the schema level even though no runtime exists yet.
+- All 54 previously-passing tests still pass (54 → 61 total).
+
+### What still needs runtime work
+
+Arity unblocks parameter-sheet authoring for operand-bearing instructions, but no interpreter consumes arity > 0 yet. Three follow-up runtime pieces are now sequenced (no longer schema-blocked):
+
+1. **Stack-machine interpreter** (Path B from the candidates survey, ~long weekend). With arity in place, stack literal-pushes can be expressed (`PUSH` with arity 1).
+2. **OISC interpreter** (~50 LOC). Subleq's `SUBLEQ a b c` is now expressible at the parameter-sheet level; the interpreter just needs to read 3 atoms after the implicit token.
+3. **Runtime semantics for `JUMP_UNCONDITIONAL`** in the BF-tape interpreter — currently raises `InterpreterError`. Could now be wired by giving it arity-via-label semantics if a tape derivative wants it (though most don't).
+
 ## [0.3.2] — 2026-05-17
 
 ### Added — GERMAN + BaguaFuck + Pikalang + Alphuck parameter sheets
