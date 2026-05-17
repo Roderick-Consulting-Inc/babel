@@ -129,10 +129,53 @@ def test_break_loop_raises_not_yet_implemented() -> None:
         run("+[b]", spec, stdin=io.StringIO(""), stdout=io.StringIO())
 
 
-def test_jump_unconditional_raises_not_yet_implemented() -> None:
-    """JUMP_UNCONDITIONAL is schema-legal but interpreter raises (operand-slot pending)."""
+def test_jump_unconditional_executes_with_arity_one() -> None:
+    """v0.5.0: JUMP_UNCONDITIONAL with arity=1 jumps to the operand-specified absolute pc.
+
+    Test program (whitespace-separated; integer operand after `jump`):
+        ``+ . jump 0``
+    Op stream after parsing: [INCREMENT, OUTPUT, JUMP_UNCONDITIONAL]
+    Runtime trace: INCREMENT (cell=1) → OUTPUT (emit '\\x01') → JUMP to pc=0 →
+        INCREMENT (cell=2) → OUTPUT (emit '\\x02') → JUMP to pc=0 → …
+    Bounded by `max_steps`; expected output begins with '\\x01\\x02\\x03'.
+    """
     spec = LanguageSpec(
         name="jump-test",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.WHITESPACE_SEPARATED_TOKENS,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token=".", op=InstructionOp.OUTPUT),
+            Instruction(token="jump", op=InstructionOp.JUMP_UNCONDITIONAL, arity=1),
+        ],
+    )
+    out = io.StringIO()
+    with pytest.raises(InterpreterError, match="max_steps"):
+        # Cap at 9 steps so we see exactly 3 increment+output cycles
+        # (3 × (INC + OUTPUT + JUMP) = 9), then the next step trips max.
+        run(
+            "+ . jump 0",
+            spec,
+            stdin=io.StringIO(""),
+            stdout=out,
+            max_steps=9,
+        )
+    assert out.getvalue() == "\x01\x02\x03"
+
+
+def test_jump_unconditional_without_arity_raises_clearly() -> None:
+    """JUMP_UNCONDITIONAL declared with arity=0 raises a clear runtime error.
+
+    The op needs an operand (the jump target); a parameter sheet that
+    declares it with arity=0 is malformed, and the interpreter surfaces
+    that explicitly rather than silently mis-jumping.
+    """
+    spec = LanguageSpec(
+        name="jump-no-arity",
         base_machine=BaseMachine.BRAINFUCK_TAPE,
         memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
         encoding=Encoding.ASCII_PUNCTUATION,
@@ -141,8 +184,96 @@ def test_jump_unconditional_raises_not_yet_implemented() -> None:
             Instruction(token="<", op=InstructionOp.PTR_LEFT),
             Instruction(token="+", op=InstructionOp.INCREMENT),
             Instruction(token="-", op=InstructionOp.DECREMENT),
-            Instruction(token="j", op=InstructionOp.JUMP_UNCONDITIONAL),
+            Instruction(token="j", op=InstructionOp.JUMP_UNCONDITIONAL),  # arity=0 default
         ],
     )
-    with pytest.raises(InterpreterError, match="jump_unconditional"):
+    with pytest.raises(InterpreterError, match="arity=1 on the jump instruction"):
         run("+j", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+
+
+def test_jump_unconditional_out_of_range_target_raises() -> None:
+    """A jump target outside the parsed-op stream raises InterpreterError."""
+    spec = LanguageSpec(
+        name="jump-oob",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.WHITESPACE_SEPARATED_TOKENS,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token="jump", op=InstructionOp.JUMP_UNCONDITIONAL, arity=1),
+        ],
+    )
+    with pytest.raises(InterpreterError, match="out of range"):
+        run("+ jump 99", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+
+
+def test_arity_with_ascii_punctuation_rejected_at_parse() -> None:
+    """ASCII-punctuation encoding has no operand slot; arity > 0 raises ParseError.
+
+    The constraint is at tokenize time, not schema time — a parameter sheet
+    can declare arity > 0 on an ascii-punctuation spec (which validates
+    fine), and the failure surfaces only when something actually tries to
+    parse a source program against it.
+    """
+    from babel.interpreter import ParseError
+
+    spec = LanguageSpec(
+        name="ascii-jump",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.ASCII_PUNCTUATION,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token="j", op=InstructionOp.JUMP_UNCONDITIONAL, arity=1),
+        ],
+    )
+    with pytest.raises(ParseError, match="ascii_punctuation"):
+        run("+j", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+
+
+def test_arity_non_integer_operand_raises_parse_error() -> None:
+    """JUMP_UNCONDITIONAL with a non-integer operand surfaces ParseError."""
+    from babel.interpreter import ParseError
+
+    spec = LanguageSpec(
+        name="jump-bad-operand",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.WHITESPACE_SEPARATED_TOKENS,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token="jump", op=InstructionOp.JUMP_UNCONDITIONAL, arity=1),
+        ],
+    )
+    with pytest.raises(ParseError, match="must be an integer"):
+        run("+ jump banana", spec, stdin=io.StringIO(""), stdout=io.StringIO())
+
+
+def test_arity_missing_operand_raises_parse_error() -> None:
+    """JUMP_UNCONDITIONAL at end of source with no operand raises ParseError."""
+    from babel.interpreter import ParseError
+
+    spec = LanguageSpec(
+        name="jump-no-operand",
+        base_machine=BaseMachine.BRAINFUCK_TAPE,
+        memory_shape=MemoryShape.TAPE_1D_UNBOUNDED,
+        encoding=Encoding.WHITESPACE_SEPARATED_TOKENS,
+        instructions=[
+            Instruction(token=">", op=InstructionOp.PTR_RIGHT),
+            Instruction(token="<", op=InstructionOp.PTR_LEFT),
+            Instruction(token="+", op=InstructionOp.INCREMENT),
+            Instruction(token="-", op=InstructionOp.DECREMENT),
+            Instruction(token="jump", op=InstructionOp.JUMP_UNCONDITIONAL, arity=1),
+        ],
+    )
+    with pytest.raises(ParseError, match="requires an operand"):
+        run("+ jump", spec, stdin=io.StringIO(""), stdout=io.StringIO())

@@ -568,26 +568,13 @@ class LanguageSpec(BaseModel):
             )
         return self
 
-    @model_validator(mode="after")
-    def _check_tape_arity_is_zero(self) -> LanguageSpec:
-        """Brainfuck-tape interpreter has no operand-consumption machinery.
-
-        A tape spec that sets ``arity > 0`` on any instruction would cause
-        the tape interpreter to misbehave (the operand atoms would be
-        re-interpreted as instruction tokens on the next pc step). Reject
-        at validation time. Non-tape specs are free to use arity > 0; the
-        non-tape interpreters that consume them will land with the OISC
-        and stack-machine extensions.
-        """
-        if self.base_machine != BaseMachine.BRAINFUCK_TAPE:
-            return self
-        non_zero = [(i.token, i.arity) for i in self.instructions if i.arity > 0]
-        if non_zero:
-            raise ValueError(
-                "brainfuck_tape language must have arity=0 on every instruction; "
-                f"got non-zero arity on: {non_zero}"
-            )
-        return self
+    # v0.5.0 — the prior `_check_tape_arity_is_zero` validator was removed
+    # when the BF-tape interpreter became arity-aware. Tape ops with arity > 0
+    # are now legal (currently only `JUMP_UNCONDITIONAL` uses it, with an
+    # integer operand interpreted as the absolute pc target). The tokenizer
+    # enforces format constraints (arity > 0 requires whitespace_separated_tokens
+    # encoding with single-atom tokens; ascii_punctuation and multi-atom tokens
+    # raise ParseError at tokenize time).
 
     @model_validator(mode="after")
     def _check_stack_ops_legal(self) -> LanguageSpec:

@@ -69,15 +69,23 @@ _CELL_MODULUS: dict[CellWidth, int | None] = {
 
 @dataclass
 class _ParsedProgram:
-    """Internal representation of a parsed source program."""
+    """Internal representation of a parsed source program.
+
+    ``ops`` is the dispatch-order canonical op list. ``operands`` is a
+    parallel list of runtime operands (``None`` for ops with arity 0,
+    integer for v0.5.0's ``JUMP_UNCONDITIONAL`` with arity 1). The shape
+    is per-position so a future arity-N op can carry a tuple without
+    breaking callers that read ``operands[pc]`` for arity-1 cases.
+    """
 
     ops: list[InstructionOp]
     # For each LOOP_START at index i, jump_table[i] is the matching LOOP_END index, and vice versa.
     jump_table: dict[int, int] = field(default_factory=dict)
+    operands: list[int | None] = field(default_factory=list)
 
 
-def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
-    """Convert source text into a flat list of canonical ops.
+def _tokenize(source: str, spec: LanguageSpec) -> tuple[list[InstructionOp], list[int | None]]:
+    """Convert source text into parallel lists of canonical ops + operands.
 
     The two encodings the vertical slice supports:
 
@@ -86,19 +94,41 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
       the instruction table are silently treated as comments — this
       matches the canonical BF convention (and is essential for
       preserving readability of common BF programs that include comments).
+      Arity > 0 is not supported under this encoding (single-char tokens
+      have no place to put operands); a parameter sheet that combines the
+      two raises ``ParseError`` at tokenization time.
     * ``WHITESPACE_SEPARATED_TOKENS``: tokens are whitespace-separated
       strings. Unknown tokens raise ``ParseError`` because in a vocabulary
-      skin a typo is almost always a real bug, not a comment.
+      skin a typo is almost always a real bug, not a comment. Arity-aware
+      since v0.5.0: when the matched ``Instruction`` has ``arity > 0`` the
+      next ``arity`` source atoms are consumed as runtime operands. For
+      ``JUMP_UNCONDITIONAL`` the operand is parsed as ``int()``; malformed
+      operands raise ``ParseError``. Multi-atom tokens (Ook!-style) are
+      still single-atom-per-instruction logically; arity on a multi-atom
+      token is rejected at tokenize time for the same reason as above.
+
+    Returns ``(ops, operands)`` where ``operands[i]`` is the runtime
+    operand for ``ops[i]`` (``None`` if the op has arity 0).
     """
-    token_to_op = {i.token: i.op for i in spec.instructions}
+    token_to_instr = {i.token: i for i in spec.instructions}
+    token_to_op = {t: i.op for t, i in token_to_instr.items()}
+    has_arity = any(i.arity > 0 for i in spec.instructions)
 
     if spec.encoding == Encoding.ASCII_PUNCTUATION:
+        if has_arity:
+            raise ParseError(
+                "ascii_punctuation encoding does not support arity > 0 ops "
+                "(single-character tokens have no operand slot); offending ops: "
+                f"{sorted(i.op.value for i in spec.instructions if i.arity > 0)}"
+            )
         ops: list[InstructionOp] = []
+        operands: list[int | None] = []
         for ch in source:
             if ch in token_to_op:
                 ops.append(token_to_op[ch])
+                operands.append(None)
             # else: treat as comment, skip silently
-        return ops
+        return ops, operands
 
     if spec.encoding == Encoding.WHITESPACE_SEPARATED_TOKENS:
         # Two flavours under this encoding:
@@ -111,19 +141,54 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
 
         if not has_multi_atom:
             ops = []
-            for raw in source.split():
-                if raw not in token_to_op:
+            operands = []
+            atoms = source.split()
+            i = 0
+            while i < len(atoms):
+                raw = atoms[i]
+                if raw not in token_to_instr:
                     raise ParseError(
                         f"unknown token {raw!r}; defined tokens are "
                         f"{sorted(token_to_op)}"
                     )
-                ops.append(token_to_op[raw])
-            return ops
+                instr = token_to_instr[raw]
+                ops.append(instr.op)
+                if instr.arity == 0:
+                    operands.append(None)
+                    i += 1
+                else:
+                    if instr.arity != 1:
+                        raise ParseError(
+                            f"BF-tape interpreter only supports arity 0 or 1; "
+                            f"got arity={instr.arity} on op {instr.op.value!r}"
+                        )
+                    if i + 1 >= len(atoms):
+                        raise ParseError(
+                            f"op {instr.op.value!r} (token {raw!r}) requires "
+                            f"an operand but source ended"
+                        )
+                    operand_str = atoms[i + 1]
+                    try:
+                        operands.append(int(operand_str))
+                    except ValueError as exc:
+                        raise ParseError(
+                            f"op {instr.op.value!r} (token {raw!r}) operand "
+                            f"must be an integer; got {operand_str!r}"
+                        ) from exc
+                    i += 2
+            return ops, operands
 
         # Multi-atom path: pre-split each token into its atom tuple, then walk
         # the source's atom stream consuming the longest matching prefix at
         # each position. This is greedy — first token sorted longest-first wins
         # any tie.
+        if has_arity:
+            raise ParseError(
+                "multi-atom whitespace tokens do not support arity > 0 ops "
+                "(the operand position becomes ambiguous against the next "
+                "multi-atom token); offending ops: "
+                f"{sorted(i.op.value for i in spec.instructions if i.arity > 0)}"
+            )
         token_to_atoms: list[tuple[tuple[str, ...], InstructionOp]] = sorted(
             ((tuple(t.split()), op) for t, op in token_to_op.items()),
             key=lambda pair: len(pair[0]),
@@ -132,6 +197,7 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
         max_atoms = token_to_atoms[0][0].__len__()
         atoms = source.split()
         ops = []
+        operands = []
         i = 0
         while i < len(atoms):
             matched = False
@@ -141,6 +207,7 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
                     continue
                 if tuple(atoms[i : i + n]) == tok_atoms:
                     ops.append(op)
+                    operands.append(None)
                     i += n
                     matched = True
                     break
@@ -150,7 +217,7 @@ def _tokenize(source: str, spec: LanguageSpec) -> list[InstructionOp]:
                     f"{atoms[i : i + max_atoms]!r}; defined tokens are "
                     f"{sorted(token_to_op)}"
                 )
-        return ops
+        return ops, operands
 
     raise ParseError(
         f"interpreter does not yet support encoding={spec.encoding.value}; "
@@ -178,9 +245,9 @@ def _build_jump_table(ops: list[InstructionOp]) -> dict[int, int]:
 
 def parse(source: str, spec: LanguageSpec) -> _ParsedProgram:
     """Tokenise + bracket-match. Public for testing and reuse."""
-    ops = _tokenize(source, spec)
+    ops, operands = _tokenize(source, spec)
     table = _build_jump_table(ops)
-    return _ParsedProgram(ops=ops, jump_table=table)
+    return _ParsedProgram(ops=ops, jump_table=table, operands=operands)
 
 
 @dataclass
@@ -380,12 +447,23 @@ def run(
             )
 
         elif op == InstructionOp.JUMP_UNCONDITIONAL:
-            # Unconditional jump to a target. Needs the Instruction
-            # operand slot, which is a separate schema extension.
-            raise InterpreterError(
-                "jump_unconditional op is not yet implemented in the interpreter "
-                "(needs the Instruction operand-slot extension; deferred)"
-            )
+            # v0.5.0: unconditional jump to the operand-specified absolute pc.
+            # The operand was consumed at tokenize time (arity=1 instruction);
+            # the parameter sheet expresses targets as integer source-atom-index
+            # values into the parsed-op stream. A `pc -= 1` step before the
+            # bottom-of-loop `pc += 1` lands execution at exactly `target`.
+            target = program.operands[pc]
+            if target is None:
+                raise InterpreterError(
+                    "jump_unconditional reached without operand — parameter sheet "
+                    "must declare arity=1 on the jump instruction"
+                )
+            if target < 0 or target >= len(ops):
+                raise InterpreterError(
+                    f"jump_unconditional target {target} out of range "
+                    f"(parsed-op stream has {len(ops)} ops)"
+                )
+            pc = target - 1  # the bottom-of-loop increment lands us on `target`
 
         else:
             raise InterpreterError(f"unhandled op {op.value}")

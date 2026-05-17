@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "babel-runtime"
-version = "0.4.2"
+version = "0.5.0"
 description = "Babel: a parameter-driven generator for esoteric programming languages."
 readme = "README.md"
 license = { text = "Apache-2.0" }

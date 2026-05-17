@@ -2,6 +2,40 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.5.0] — 2026-05-17
+
+### Added — BF-tape arity-aware tokenizer + `JUMP_UNCONDITIONAL` runtime
+
+The BF-tape interpreter becomes operand-aware. Closes the last v0.2.0 deferral ("`JUMP_UNCONDITIONAL` needs the deferred operand-slot extension; runtime support is a follow-up") and the v0.3.3 forward-looking note ("Runtime semantics for `JUMP_UNCONDITIONAL` in the BF-tape interpreter").
+
+#### Added
+
+- **Arity-aware BF-tape tokenizer.** `_tokenize` now returns `(ops, operands)` parallel lists; when an `Instruction` declares `arity > 0`, the next source atoms are consumed as runtime operands. The arity-1 operand is parsed as `int()` (matches the stack interpreter's `STACK_PUSH` shape). Constraints surface as `ParseError` at parse time, not as silent corruption: arity > 1 rejected (the BF-tape pattern only needs arity-0 and arity-1 ops); `ascii_punctuation` encoding with arity > 0 rejected (single-character tokens have no operand slot); multi-atom whitespace tokens with arity > 0 rejected (the operand position becomes ambiguous against the next multi-atom token); missing operand at end of source rejected; non-integer operand rejected with the offending token quoted.
+- **`InstructionOp.JUMP_UNCONDITIONAL` runtime.** With arity=1, the operand is the absolute `pc` target into the parsed-op stream. Jump targets out of range raise `InterpreterError`. The op is also schema-legal with arity=0 (parameter sheet may declare it), but executing it that way raises a clear runtime error ("must declare arity=1 on the jump instruction") rather than mis-jumping. Programs can now express loops without the BF bracket pair (`[` `]`) — useful for La Weá-style tape derivatives whose original wiki specifies a jump-target instruction.
+- **`_ParsedProgram.operands`** — new parallel list alongside `ops`; `None` for arity-0 ops, integer for the v0.5.0 `JUMP_UNCONDITIONAL` arity-1 case. Shape generalises to a tuple per position if a future tape op needs multiple operands.
+
+#### Changed
+
+- **Removed `LanguageSpec._check_tape_arity_is_zero`** validator. The validator was a v0.3.3 safety check that fired before the interpreter knew how to consume operands — now that the tokenizer is arity-aware, the validator's job moves to the tokenizer (which rejects bad combinations at parse time with more actionable error messages). Tape specs are now schema-validating with arity > 0 instructions; whether the runtime can interpret a particular arity-N op is determined when the source is parsed. The parallel updates to the validators on the OISC and stack base machines (which already accept arity > 0) stay unchanged.
+
+#### Tests
+
+- 5 new `tests/test_interpreter.py` tests: `JUMP_UNCONDITIONAL` jumps correctly and produces an output sequence `\x01\x02\x03` from a 3-iteration loop bounded by `max_steps`; raises clearly when declared without arity; raises on out-of-range target; raises `ParseError` on `ascii_punctuation` + arity > 0; raises `ParseError` on non-integer operand; raises `ParseError` on missing operand at end of source.
+- 1 updated `tests/test_instruction_arity.py` test: `test_tape_spec_rejects_nonzero_arity` → `test_tape_spec_accepts_nonzero_arity_post_v0_5_0` (mirror of the schema-validator change).
+- All 95 previously-passing v0.4.2 tests still pass (95 → 101 total).
+
+#### Operand-slot extension across the family
+
+The v0.2.0 → v0.3.3 → v0.4.0 → v0.4.1 → v0.5.0 arc closes the operand-slot story for all three base machines now in the runtime:
+
+| Family | Operand support | Op that uses it |
+| --- | --- | --- |
+| `brainfuck_tape` | v0.5.0 (this release) | `JUMP_UNCONDITIONAL` (arity 1) |
+| `stack` | v0.4.0 | `STACK_PUSH` (arity 1) |
+| `oisc` | v0.4.1 | `SUBLEQ` (arity 3) |
+
+The remaining schema-stub op without a runtime is `BREAK_LOOP` (Brainlove-style "exit innermost enclosing loop") — that one needs a runtime loop-stack rather than operand-consumption, which is a separate piece.
+
 ## [0.4.2] — 2026-05-17
 
 ### Changed — Package-level dispatcher now routes OISC
