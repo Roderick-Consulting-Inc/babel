@@ -144,6 +144,22 @@ class InstructionOp(str, Enum):
     BREAK_LOOP = "break_loop"  # Exit innermost enclosing loop (Brainlove); interpreter NotImplementedError pending runtime support
     JUMP_UNCONDITIONAL = "jump_unconditional"  # Unconditional jump to label/target (La Weá); interpreter NotImplementedError pending operand-slot support
 
+    # v0.4.0 — stack-machine ops (Path B; first non-tape base machine).
+    # See research-notes/interpreter-candidates-2026-05-17.md (§ "Stack-machine
+    # family"). A deliberately minimal set covering literal push, pop, dup,
+    # swap, add/sub, and the two character/integer output flavours. Designed
+    # to be extended (mul/div/mod, rot/over/pick, comparisons, conditional
+    # branches) in follow-up sheets as concrete stack-language exemplars
+    # (FALSE, Underload, Forth subset) land.
+    STACK_PUSH = "stack_push"  # Push the operand (arity=1) onto the stack.
+    STACK_POP = "stack_pop"  # Drop the top of stack.
+    STACK_DUP = "stack_dup"  # Duplicate the top of stack.
+    STACK_SWAP = "stack_swap"  # Swap the top two elements.
+    STACK_ADD = "stack_add"  # Pop two, push their sum.
+    STACK_SUB = "stack_sub"  # Pop top (b) then second (a); push a - b.
+    STACK_OUTPUT_CHAR = "stack_output_char"  # Pop top; output as ASCII char.
+    STACK_OUTPUT_INT = "stack_output_int"  # Pop top; output as decimal integer.
+
 
 # Operations that are only valid on a Brainfuck-tape base machine.
 _TAPE_OPS: frozenset[InstructionOp] = frozenset(
@@ -187,6 +203,29 @@ _TAPE_CELL_MODIFY_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.INPUT,  # INPUT replaces the cell, counts as a modifier
     }
 )
+
+# Operations that are only valid on a stack base machine. v0.4.0 ships a
+# deliberately minimal core — push/pop/dup/swap, add/sub, and two output
+# flavours — large enough to demonstrate the dispatcher and the arity-
+# aware tokenizer, small enough that the dispatch table fits on a screen.
+# Follow-up sheets (FALSE, Underload, Forth subset) will likely grow this
+# set; the discipline is the same as `_TAPE_OPS` — every op enumerated
+# here must have a clause in `stack_interpreter._step`.
+_STACK_OPS: frozenset[InstructionOp] = frozenset(
+    {
+        InstructionOp.STACK_PUSH,
+        InstructionOp.STACK_POP,
+        InstructionOp.STACK_DUP,
+        InstructionOp.STACK_SWAP,
+        InstructionOp.STACK_ADD,
+        InstructionOp.STACK_SUB,
+        InstructionOp.STACK_OUTPUT_CHAR,
+        InstructionOp.STACK_OUTPUT_INT,
+        # Cross-family ops legal on a stack machine too.
+        InstructionOp.HALT,
+    }
+)
+
 
 # The eight canonical Brainfuck operations — the minimum a tape language must define.
 _CANONICAL_BF_OPS: frozenset[InstructionOp] = frozenset(
@@ -508,6 +547,33 @@ class LanguageSpec(BaseModel):
             raise ValueError(
                 "brainfuck_tape language must have arity=0 on every instruction; "
                 f"got non-zero arity on: {non_zero}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_stack_ops_legal(self) -> LanguageSpec:
+        """A stack-machine language must reference only stack-legal ops.
+
+        Parallel to `_check_brainfuck_tape_completeness` but deliberately
+        lighter-weight: there is no canonical-minimum stack op set the way
+        there is for Brainfuck (a stack language can be just `PUSH` + one
+        output op and still be a valid pedagogical example, as the
+        accompanying `examples/minimal-stack.yaml` demonstrates by going
+        a little further). The rule we *do* enforce is the negative one:
+        a stack spec cannot reference ops that have no defined semantics
+        on a stack (e.g. tape pointer movement, BF loop brackets). The
+        stack interpreter's dispatch table is the source of truth — see
+        ``_STACK_OPS`` above.
+        """
+        if self.base_machine != BaseMachine.STACK:
+            return self
+        defined_ops = {i.op for i in self.instructions}
+        illegal = defined_ops - _STACK_OPS
+        if illegal:
+            raise ValueError(
+                "stack language defines operations that don't apply to a stack "
+                f"machine: {sorted(o.value for o in illegal)}; legal stack ops are "
+                f"{sorted(o.value for o in _STACK_OPS)}"
             )
         return self
 

@@ -1,0 +1,102 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Minimal stack — Babel's first stack-machine parameter sheet (v0.4.0).
+#
+# This is *not* a canonical esolang from the wiki — it's a synthetic
+# demo whose only purpose is to validate Babel's first non-tape runtime.
+# Concrete stack-language sheets (FALSE, Underload, a Forth subset) will
+# follow in their own releases, each likely growing the
+# `STACK_*` op set in `babel/schema.py` to match the source language's
+# semantics. This sheet covers exactly the v0.4.0 op core: push (with an
+# integer operand), pop, dup, swap, add, sub, character output, integer
+# output.
+#
+# Encoding is whitespace-separated tokens; literals are written inline
+# after `push` (arity=1). For example, `push 65 emit` writes 'A' to
+# stdout; `push 10 push 3 sub print` writes "7".
+
+name: "Minimal Stack"
+version: "0.1.0"
+description: |
+  Babel's first stack-machine parameter sheet — a deliberately small,
+  synthetic demo (not a canonical esolang) that exercises every op in
+  the v0.4.0 stack core. Eight tokens map to the eight `STACK_*` ops
+  (push/pop/dup/swap/add/sub/emit/print). The `push` token has arity=1
+  and reads the next whitespace-separated source atom as a decimal
+  integer literal.
+
+base_machine: stack
+memory_shape: stack_unbounded
+cell_width: arbitrary
+encoding: whitespace_separated_tokens
+io: character
+theme: null
+source_extension: ".stk"
+
+instructions:
+  - token: "push"
+    op: stack_push
+    arity: 1
+    description: "Push the next source atom (parsed as a decimal integer) onto the stack."
+  - token: "pop"
+    op: stack_pop
+    description: "Drop the top of stack."
+  - token: "dup"
+    op: stack_dup
+    description: "Duplicate the top of stack."
+  - token: "swap"
+    op: stack_swap
+    description: "Swap the top two stack elements."
+  - token: "add"
+    op: stack_add
+    description: "Pop two values; push their sum."
+  - token: "sub"
+    op: stack_sub
+    description: "Pop top (b) then second (a); push a - b."
+  - token: "emit"
+    op: stack_output_char
+    description: "Pop the top value; write it as an ASCII character (low byte) to stdout."
+  - token: "print"
+    op: stack_output_int
+    description: "Pop the top value; write it as a decimal integer to stdout."
+
+additions: []
+removals: []
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: medium
+  playfulness: low
+  unpredictability: zero
+  naturalness: vocabulary
+
+examples:
+  - title: "Print the letter A"
+    source: "push 65 emit"
+    expected_output: "A"
+    description: >
+      Pushes 65 onto the stack and emits it as the ASCII character 'A'.
+
+  - title: "Add 5 and 3, print the integer result"
+    source: "push 5 push 3 add print"
+    expected_output: "8"
+    description: >
+      Pushes 5, pushes 3, adds them (popping both, pushing 8), then
+      prints 8 as a decimal integer.
+
+  - title: "Subtract 3 from 10"
+    source: "push 10 push 3 sub print"
+    expected_output: "7"
+    description: >
+      Demonstrates the operand order of STACK_SUB: pop b=3, pop a=10,
+      push a - b = 7.
+
+  - title: "Double via dup + add, print as character"
+    source: "push 1 dup add emit"
+    expected_output: "\x02"
+    description: >
+      Pushes 1, duplicates it (stack: [1, 1]), adds (stack: [2]), emits
+      as the single character with codepoint 2.

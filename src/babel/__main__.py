@@ -30,7 +30,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from babel.interpreter import run
+from babel import run  # base-machine-dispatching entry point (v0.4.0)
 from babel.loader import load_spec
 from babel.transpiler import transpile
 
