@@ -17,12 +17,14 @@ The package exposes the parameter schema (Pydantic models), a YAML loader,
 and three output emitters: an interpreter, a transpiler, and a markdown
 specification page.
 
-As of v0.4.0 Babel supports two base-machine runtimes end-to-end: the
-original Brainfuck-tape family (``base_machine = brainfuck_tape``) and
-the new stack-machine family (``base_machine = stack``). The package-
-level ``run`` function dispatches on ``spec.base_machine`` and calls the
-appropriate per-family interpreter; the per-family modules
-(`babel.interpreter` for tape, `babel.stack_interpreter` for stack)
+As of v0.4.2 Babel supports three base-machine runtimes end-to-end: the
+original Brainfuck-tape family (``base_machine = brainfuck_tape``), the
+stack-machine family (``base_machine = stack``, shipped v0.4.0), and the
+OISC Subleq family (``base_machine = oisc``, shipped v0.4.1 — wired into
+the dispatcher in v0.4.2). The package-level ``run`` function dispatches
+on ``spec.base_machine`` and calls the appropriate per-family interpreter;
+the per-family modules (`babel.interpreter` for tape,
+`babel.stack_interpreter` for stack, `babel.oisc_interpreter` for OISC)
 remain importable and continue to enforce their original single-family
 contracts.
 """
@@ -42,7 +44,7 @@ from babel.schema import (
     MetaParameters,
 )
 
-__version__ = "0.4.0"
+__version__ = "0.4.2"
 
 
 def run(
@@ -59,6 +61,7 @@ def run(
 
     * ``brainfuck_tape`` → :func:`babel.interpreter.run`
     * ``stack`` → :func:`babel.stack_interpreter.run`
+    * ``oisc`` → :func:`babel.oisc_interpreter.run`
     * any other value → :class:`babel.interpreter.InterpreterError`
 
     ``**kwargs`` is forwarded to the underlying runtime so callers can
@@ -80,15 +83,18 @@ def run(
     # and a small surface area — importing lazily keeps `import babel`
     # cheap for callers that only need the schema models).
     from babel import interpreter as tape_interpreter
+    from babel import oisc_interpreter as oisc_runtime
     from babel import stack_interpreter as stack_runtime
 
     if spec.base_machine == BaseMachine.BRAINFUCK_TAPE:
         return tape_interpreter.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
     if spec.base_machine == BaseMachine.STACK:
         return stack_runtime.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
+    if spec.base_machine == BaseMachine.OISC:
+        return oisc_runtime.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
     raise tape_interpreter.InterpreterError(
         f"no runtime is implemented for base_machine={spec.base_machine.value}; "
-        "supported families are brainfuck_tape and stack"
+        "supported families are brainfuck_tape, stack, and oisc"
     )
 
 

@@ -2,6 +2,19 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.4.2] — 2026-05-17
+
+### Changed — Package-level dispatcher now routes OISC
+
+`babel.run` (the package-level entry point) now dispatches `base_machine = oisc` specs to `babel.oisc_interpreter.run`, matching the routing for `brainfuck_tape` and `stack`. Closes the v0.4.1 follow-up note ("This release does *not* extend the package-level `babel.run` dispatcher to OISC; v0.4.2 will wire that").
+
+Callers that previously had to use `from babel.oisc_interpreter import run` directly can now use `babel.run(source, spec)` regardless of which of the three base machines the spec uses. The per-family `babel.oisc_interpreter.run` entry point keeps its original single-family contract (still raises on non-OISC specs); both styles are supported.
+
+#### Tests
+
+- 1 new `tests/test_dispatcher_oisc.py` test verifying `babel.run` correctly routes an OISC spec to the OISC interpreter and produces expected output.
+- All 95 previously-passing v0.4.1 tests still pass (95 → 96 total).
+
 ## [0.4.1] — 2026-05-17
 
 ### Added — OISC Subleq interpreter (second non-tape base machine)
