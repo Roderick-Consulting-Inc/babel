@@ -1,0 +1,70 @@
+# Mierda — a Brainfuck derivative that substitutes the eight canonical
+# instructions with their Spanish-language verbs and adverbs.
+#
+# Mierda is a "trivial brainfuck substitution" (per esolangs.org's own
+# category) — a vocabulary-only skin on canonical BF with no semantic
+# additions. It is one of the first-page Spanish-flavoured esolangs and
+# the earliest catalogued Spanish BF derivative. Until this Babel sheet,
+# the only known interpreter was a fragile Common Lisp implementation;
+# this sheet revives the language as an executable parameter sheet.
+#
+# Reference: https://esolangs.org/wiki/Mierda
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells, whitespace-
+# separated tokens. Mixes single-atom tokens (Mas, Menos, Derecha,
+# Izquierda, Decir, Leer) with two-atom tokens (Iniciar Bucle,
+# Terminar Bucle), which exercises the v0.3.0 multi-atom tokenizer
+# in a mixed configuration.
+
+name: Mierda
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose surface tokens are the Spanish translations
+  of the actions each canonical BF operation produces — *Mas*, *Menos*,
+  *Derecha*, *Izquierda*, *Decir*, *Leer*, *Iniciar Bucle*, *Terminar
+  Bucle*. No semantic additions over BF; pure vocabulary skin. Together
+  with `brainfuck-rioplatense.yaml` (Argentine *che*/*vení*/*decí*) and
+  `brainfuck-chespirito.yaml` (Mexican *chilindrina*/*chompiras*), this
+  completes the Babel Spanish-language BF-derivative trio.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+theme: spanish-vocabulary
+source_extension: .mierda
+
+instructions:
+  - token: "Mas"
+    op: increment
+    description: "Increment the byte at the data pointer."
+  - token: "Menos"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "Derecha"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "Izquierda"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "Decir"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "Leer"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "Iniciar Bucle"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `Terminar Bucle`."
+  - token: "Terminar Bucle"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `Iniciar Bucle`."
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: verbose
+  playfulness: moderate
+  unpredictability: zero
+  naturalness: vocabulary

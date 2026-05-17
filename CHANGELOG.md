@@ -2,6 +2,23 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.3.1] — 2026-05-17
+
+### Added — Chespirito + Mierda parameter sheets (completes the Spanish-language BF trio)
+
+Two new parameter sheets ship in this release, no runtime changes:
+
+- **`examples/brainfuck-chespirito.yaml`** — Brainfuck derivative whose surface tokens are Spanish words from the vocabulary of Roberto Gómez Bolaños (the Mexican comedian *Chespirito*) — *chilindrina*, *chiquitolina*, *chompiras*, *chaparrón*, *chipote*, *chillón*, *chanfle*, *chapulín*, plus *chiripiolca* mapped to the `random` op. Mexican-Spanish vocabulary; 9 single-atom instructions; uses the v0.1.0 fast path.
+- **`examples/brainfuck-mierda.yaml`** — pure peninsular-Spanish vocabulary skin (*Mas*, *Menos*, *Derecha*, *Izquierda*, *Decir*, *Leer*, *Iniciar Bucle*, *Terminar Bucle*). 6 single-atom + 2 two-atom tokens in one sheet; exercises the v0.3.0 multi-atom tokenizer in a mixed configuration the Ook! sheet doesn't. Mierda's only known prior implementation was a fragile Common Lisp interpreter; this sheet revives the language.
+
+Together with `brainfuck-rioplatense.yaml` (Argentine), the trio gives Babel coverage of three Spanish-language registers — Mexican, peninsular, and Rioplatense — from the single parameter-sheet schema.
+
+#### Tests
+
+- `tests/test_chespirito.py` — 4 tests including Hello World end-to-end and `chiripiolca` random behaviour.
+- `tests/test_mierda.py` — 4 tests including Hello World end-to-end and a mixed single+multi-atom program.
+- All previous tests still pass (24 → 32 total).
+
 ## [0.3.0] — 2026-05-17
 
 ### Added — Multi-atom whitespace tokens + first new parameter sheet (Ook!)

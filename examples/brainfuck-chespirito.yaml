@@ -1,0 +1,75 @@
+# Chespirito — a Brainfuck derivative whose surface tokens are Spanish words
+# coined or popularised by Roberto Gómez Bolaños (1929–2014), the Mexican
+# comedian-writer who used the stage name *Chespirito* and created the
+# *El Chavo del Ocho* / *El Chapulín Colorado* family of characters and
+# catchphrases.
+#
+# Each canonical Brainfuck instruction maps to one Chespirito-vocabulary
+# token. A ninth op (`chiripiolca`) extends BF with a randomness primitive.
+#
+# Reference: https://esolangs.org/wiki/Chespirito
+#
+# Babel-fit: brainfuck_tape + 1d_unbounded + byte cells, whitespace-separated
+# single-atom tokens. Uses the `random` op already in v0.1.0; no schema
+# extensions needed. This sheet completes the Spanish-language BF-derivative
+# trio alongside `brainfuck-rioplatense.yaml` (Argentine) and the in-progress
+# `brainfuck-mierda.yaml` (peninsular Spanish).
+
+name: Chespirito
+version: "0.1.0"
+description: |
+  A Brainfuck derivative whose surface tokens are Spanish words coined or
+  popularised by the Mexican comedian Roberto Gómez Bolaños (*Chespirito*) —
+  *chilindrina*, *chiquitolina*, *chompiras*, *chaparrón*, *chipote*, *chillón*,
+  *chanfle*, *chapulín* — plus *chiripiolca*, an added randomness primitive
+  named after the *chiripiolca* attack of the character La Chilindrina.
+
+base_machine: brainfuck_tape
+memory_shape: 1d_unbounded
+cell_width: byte
+encoding: whitespace_separated_tokens
+io: character
+theme: chespirito-vocabulary
+source_extension: .chespirito
+
+instructions:
+  - token: "chilindrina"
+    op: increment
+    description: "Increment the byte at the data pointer."
+  - token: "chiquitolina"
+    op: decrement
+    description: "Decrement the byte at the data pointer."
+  - token: "chompiras"
+    op: ptr_right
+    description: "Move the data pointer one cell to the right."
+  - token: "chaparron"
+    op: ptr_left
+    description: "Move the data pointer one cell to the left."
+  - token: "chipote"
+    op: loop_start
+    description: "If the byte at the data pointer is zero, jump past the matching `chillon`."
+  - token: "chillon"
+    op: loop_end
+    description: "If the byte at the data pointer is non-zero, jump back to the matching `chipote`."
+  - token: "chanfle"
+    op: output
+    description: "Output the byte at the data pointer as an ASCII character."
+  - token: "chapulin"
+    op: input
+    description: "Read one byte of input into the cell at the data pointer."
+  - token: "chiripiolca"
+    op: random
+    description: |
+      Set the byte at the data pointer to a random value. The esolangs.org page
+      describes the canonical behaviour as "prints random characters in an
+      infinite loop", which is consistent with `random` used inside a
+      programmer-supplied loop — Babel implements just the per-call random
+      assignment; the loop is up to the program.
+
+meta:
+  complexity: low
+  abstraction: low
+  verbosity: verbose
+  playfulness: high
+  unpredictability: moderate
+  naturalness: vocabulary
