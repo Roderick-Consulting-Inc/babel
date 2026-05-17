@@ -2,6 +2,29 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.4.0] — 2026-05-17
+
+### Added — Stack-machine runtime (first non-tape base machine)
+
+Babel's first Path B investment from the [BF-family interpreter-candidates survey](research-notes/interpreter-candidates-2026-05-17.md): a stack-machine interpreter alongside the existing Brainfuck-tape one. The schema has reserved `BaseMachine.STACK` and the `STACK_UNBOUNDED` / `STACK_BOUNDED` memory shapes since v0.1.0; v0.4.0 lights up the runtime behind them.
+
+#### Added
+
+- **Eight new `InstructionOp` values** for the stack core: `STACK_PUSH` (arity 1; reads the next source atom as an integer literal), `STACK_POP`, `STACK_DUP`, `STACK_SWAP`, `STACK_ADD`, `STACK_SUB`, `STACK_OUTPUT_CHAR`, `STACK_OUTPUT_INT`. `HALT` (already in the enum since v0.2.0) is also recognised by the stack runtime. The set is deliberately minimal — large enough to demonstrate the dispatcher and arity-aware tokenizer, small enough that the dispatch table fits on a screen; concrete stack-language sheets (FALSE, Underload, a Forth subset) will grow it in follow-up releases.
+- **`_STACK_OPS` frozenset** in `babel/schema.py`, parallel to `_TAPE_OPS`, plus a new `_check_stack_ops_legal` cross-field validator on `LanguageSpec`. A stack spec that references tape-only ops (e.g. `PTR_RIGHT`, `LOOP_START`) is rejected at schema-validation time with a clear error listing the legal stack ops. Tape spec validation is unchanged.
+- **`babel/stack_interpreter.py`** — the stack runtime. Mirrors the structure of `babel/interpreter.py`: a `parse()` helper, a `run()` entry point with the same `stdin`/`stdout`/`max_steps` parameters, and a `_step`-style dispatch loop. The tokenizer is **arity-aware** — at each step it looks up the matched `Instruction` and, if `arity > 0`, consumes the next `arity` source atoms as runtime operands. `STACK_PUSH`'s operand is parsed with `int()`; malformed operands raise the existing `ParseError` (reused from `babel.interpreter` so callers can catch one exception type across both families). Supports both stack memory shapes (`STACK_UNBOUNDED` and `STACK_BOUNDED` with a configurable cap; overflow raises `InterpreterError`) and honours cell-width wrap on arithmetic (`BYTE` mod 256, `WORD` mod 2**32, etc.).
+- **Base-machine dispatcher in `babel/__init__.py`** — a new package-level `babel.run(source, spec, ...)` that picks the right runtime based on `spec.base_machine`. The per-family modules keep their original single-family contracts: `babel.interpreter.run` still raises on non-tape specs, and `babel.stack_interpreter.run` raises on non-stack specs. The dispatcher is the new ergonomic entry point for callers that want a single-call API across families. `babel/__main__.py` switches to the dispatcher so `babel run minimal-stack.yaml --program "push 65 emit"` works from the CLI end-to-end.
+- **`examples/minimal-stack.yaml`** — Babel's first stack parameter sheet. Explicitly labelled in its description as a synthetic demo (not a canonical wiki esolang) whose purpose is to validate the runtime. Eight whitespace-separated tokens (`push`, `pop`, `dup`, `swap`, `add`, `sub`, `emit`, `print`) covering exactly the v0.4.0 op core. `push` has arity 1; the other seven have arity 0.
+
+#### Tests
+
+- 23 new `tests/test_stack_interpreter.py` tests: empty + whitespace-only programs run to completion; the four spec'd examples from the YAML (`push 65 emit` → `A`, `push 5 push 3 add emit` → `\x08`, `push 1 dup add emit` → `\x02`, `push 10 push 3 sub print` → `7`); `swap`, `pop`, integer output; stack underflow on `pop`/`emit`/`swap` raises `InterpreterError`; malformed/missing `push` operand and unknown tokens raise `ParseError`; `max_steps` honoured; the stack runtime rejects tape specs with a clear error; bounded-stack overflow raises; BYTE-cell-width add wraps; YAML round-trip + end-to-end run; the package-level dispatcher routes correctly for both stack and tape specs; the schema validator rejects tape ops on stack specs.
+- All 54 previously-passing tests still pass (54 → 77 total).
+
+### What this unblocks
+
+The dispatcher pattern (`babel.run` routes on `spec.base_machine`; per-family modules keep single-family contracts) is the template for every future Path B family. The next non-tape runtimes — OISC/Subleq first (~50 LOC, the operand-slot is already in place from v0.3.3), then register / queue / fungeoid_2d — slot into the same shape: a new `<family>_interpreter.py` module, a new `_FAMILY_OPS` frozenset + validator pair in `schema.py`, and one new clause in the package dispatcher.
+
 ## [0.3.3] — 2026-05-17
 
 ### Added — `Instruction.arity` field (operand-slot extension deferred from v0.2.0)
