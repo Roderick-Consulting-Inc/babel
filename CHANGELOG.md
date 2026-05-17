@@ -2,6 +2,57 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.6.2] — 2026-05-17
+
+### Added — Fungeoid 2D base machine + Befunge-93 parameter sheet (third non-tape runtime)
+
+Babel's fourth base-machine runtime end-to-end, after Brainfuck-tape (since v0.1.0), stack (v0.4.0), and OISC (v0.4.1). The fungeoid family is Babel's first **2D** execution model: a rectangular grid of ASCII cells, a directional instruction pointer that wraps toroidally, and a (conventional 1D) data stack. The canonical exemplar shipped in this release is `Befunge-93 <https://esolangs.org/wiki/Befunge>`__ (Pressey, 1993).
+
+(Versioned as v0.6.2 because the v0.6.0 and v0.6.1 slots on this branch were claimed by the FALSE-stack and Spoon/Wordfuck releases respectively; all three releases ship the same day. The MINOR-version family for "new base machine" was previously consumed by stack (v0.4.0) and OISC (v0.4.1); under the pre-1.0 minor-bump-for-new-base convention this would otherwise be a fresh v0.6.0.)
+
+#### Added
+
+- **19 new `InstructionOp` values** in the fungeoid family (all prefixed `FUNGEOID_*` for dispatch isolation from the superficially-overlapping `STACK_*` family):
+  - Direction: `FUNGEOID_DIR_RIGHT` / `_LEFT` / `_UP` / `_DOWN` — Befunge `> < ^ v`
+  - Stack literal: `FUNGEOID_PUSH_DIGIT` — Befunge `0`..`9`. One canonical op; the digit value is encoded in the *token* itself (the ten cell-character entries on the parameter sheet all share this op, with a narrow carve-out in `LanguageSpec._instructions_unique` to permit the ten-to-one mapping)
+  - Arithmetic: `FUNGEOID_STACK_ADD` / `_SUB` / `_MUL` / `_DIV` — Befunge `+ - * /`. Division by zero pushes `0` (Befunge silent-zero convention; FALSE's stack-runtime divide raises, the difference is documented in both module docstrings)
+  - Stack manipulation: `FUNGEOID_STACK_DUP` / `_SWAP` / `_POP` — Befunge `: \ $`. Underflow is silent (the Befunge "implicit zero" convention extends to all three: dup of empty pushes 0; swap of <2 elements zero-fills; pop of empty is a no-op)
+  - I/O: `FUNGEOID_OUTPUT_INT` (`. ` — note the trailing space, which is part of the spec) / `FUNGEOID_OUTPUT_CHAR` (`,`)
+  - Conditionals: `FUNGEOID_IF_HORIZONTAL` / `_VERTICAL` — Befunge `_ |`
+  - Control: `FUNGEOID_STRING_MODE_TOGGLE` (`"`) / `FUNGEOID_BRIDGE` (`#`) / `FUNGEOID_NOOP` (space) — and the cross-family `HALT` (`@`) is re-used unchanged
+- **`_FUNGEOID_OPS` frozenset** in `schema.py` plus a parallel **`_check_fungeoid_ops_legal`** model-validator on `LanguageSpec` — same shape as the stack-family's `_STACK_OPS` / `_check_stack_ops_legal`: a negative-only rule that rejects ops with no defined semantics on a 2D grid.
+- **Narrow carve-out** on `_instructions_unique`: `FUNGEOID_PUSH_DIGIT` is the only op for which multiple `Instruction` entries (sharing the op, differing in token) are legal. Every other op still enforces the per-op uniqueness rule. The dup-token rule is unchanged.
+- **`src/babel/fungeoid_interpreter.py`** — a sibling module to `interpreter.py` / `stack_interpreter.py` / `oisc_interpreter.py`. Mirror of the structure: top-level `run(source, spec, *, stdin, stdout, max_steps=100_000)` matching the OISC signature; internal `_Grid`, `_IP`, `_State` dataclasses; `_build_dispatch_table` validates single-character tokens + arity=0 at parse time; the main loop reads one cell, dispatches on the canonical op (or pushes `ord(cell)` if string mode is on), then advances the IP toroidally. The bridge `#` works by calling the IP advance once extra in its handler before the bottom-of-loop advance.
+- **`examples/befunge.yaml`** — 29 tokens (4 directions + 10 digits + 4 arithmetic + 3 stack-manip + 2 I/O + 2 conditionals + 1 string-mode + 1 bridge + 1 halt + 1 noop). Theme `befunge`, source_extension `.befunge`. Includes four examples: a `2.@` smoke test, a `54+.@` arithmetic demo, the canonical Hello World `"!dlroW olleH">:#,_@`, and a string-mode character output `"A",@`.
+- **Package-level dispatcher wired in `babel/__init__.py`.** `babel.run` now routes `fungeoid_2d` specs to `babel.fungeoid_interpreter.run`; the module docstring is updated to reflect four base-machine runtimes; the per-family `babel.fungeoid_interpreter.run` keeps its single-family contract (rejects non-fungeoid specs).
+
+#### Tests
+
+- 35 new `tests/test_fungeoid_interpreter.py` tests: YAML loads + 29-token inventory + ten-digit op-sharing check; empty source + whitespace-only source both run to completion; tiny `2.@`, `54+.@`, `93-.@`, `67*.@`, `50/.@` (silent-zero) programs; string-mode push/pop ordering; 2D direction reversal via `v`; toroidal wrap-around via `<` heading off the left edge; bridge `#` skipping a cell; dup / swap / pop; the Befunge "implicit zero" convention on each of dup-of-empty / pop-of-empty; halt via `@`; `max_steps` cap on a `>`-only torus loop; unknown-cell error; canonical Hello World end-to-end; the YAML's Hello World example end-to-end; runtime + schema-level guards (non-fungeoid spec rejected, non-2D-grid encoding rejected, stack op on fungeoid spec rejected, multi-char token rejected as ParseError, ten-digit duplicate-op allowed by carve-out, dup ops outside the carve-out still rejected); package-level dispatcher routes correctly for both the smoke test and the Hello World.
+- All 158 previously-passing v0.6.1 tests still pass (+35 from this batch → 193 total).
+
+#### Hello World variant
+
+The shipped Hello World is the canonical single-line Befunge-93 idiom: `"!dlroW olleH">:#,_@`. Toggles string mode, pushes the characters of `Hello World!` in reverse (so `H` ends up on top), then enters a print loop: `:` dup the top, `#` bridge over the `,`, `_` horizontal-if sends control LEFT on non-zero. Going left, the IP hits the `,` and prints; continues left to `#` which skips `:` on the way back; the `>` resets direction to RIGHT and the loop repeats. When the implicit zero is finally popped (every character has been emitted), `_` sends control RIGHT and the IP hits `@` to halt. Output: `Hello World!` (no trailing newline; Befunge programs that want one print it explicitly).
+
+#### Deferred from this release
+
+The standard Befunge-93 ops not yet implemented, with the runtime extension each would need (each is a 1–2 PR follow-up, scoped to leave the v0.6.2 dispatch table untouched):
+
+| Op | Token | Blocked on |
+| --- | --- | --- |
+| put | `p` | Self-modifying grid write (mutable grid + bounds policy) |
+| get | `g` | Self-modifying grid read (mirror of `p`) |
+| random direction | `?` | Seeded `random.Random` plumbed through the runtime signature (same shape as the BF-tape `RANDOM` op) |
+| input integer | `&` | Stdin read + integer parse + push (already-reserved `stdin` parameter is unused by the v0.6.2 op set) |
+| input character | `~` | Stdin one-byte read + push of codepoint |
+
+The runtime gap on the biggest of those (`p` / `g`) is the natural next milestone for Befunge-scope work, since several non-trivial Befunge programs depend on the self-modifying property to compute jump tables.
+
+#### Constraint observed
+
+Per the v0.6.2 work-order constraint, `src/babel/interpreter.py`, `src/babel/stack_interpreter.py`, and `src/babel/oisc_interpreter.py` are unchanged in this release. The fungeoid runtime lives in a fourth sibling module that re-uses zero code from the other three; the only cross-module reach is the schema enum / frozenset additions and the dispatcher branch.
+
 ## [0.6.1] — 2026-05-17
 
 ### Added — `VARIABLE_LENGTH_BINARY` (Spoon) + `WORD_LENGTH_DISPATCH` (Wordfuck) tokenizers

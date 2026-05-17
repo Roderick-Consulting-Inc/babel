@@ -17,16 +17,18 @@ The package exposes the parameter schema (Pydantic models), a YAML loader,
 and three output emitters: an interpreter, a transpiler, and a markdown
 specification page.
 
-As of v0.4.2 Babel supports three base-machine runtimes end-to-end: the
+As of v0.6.0 Babel supports four base-machine runtimes end-to-end: the
 original Brainfuck-tape family (``base_machine = brainfuck_tape``), the
-stack-machine family (``base_machine = stack``, shipped v0.4.0), and the
+stack-machine family (``base_machine = stack``, shipped v0.4.0), the
 OISC Subleq family (``base_machine = oisc``, shipped v0.4.1 — wired into
-the dispatcher in v0.4.2). The package-level ``run`` function dispatches
-on ``spec.base_machine`` and calls the appropriate per-family interpreter;
-the per-family modules (`babel.interpreter` for tape,
-`babel.stack_interpreter` for stack, `babel.oisc_interpreter` for OISC)
-remain importable and continue to enforce their original single-family
-contracts.
+the dispatcher in v0.4.2), and the fungeoid 2D family (``base_machine =
+fungeoid_2d``, shipped v0.6.0 — Befunge-93 subset). The package-level
+``run`` function dispatches on ``spec.base_machine`` and calls the
+appropriate per-family interpreter; the per-family modules
+(`babel.interpreter` for tape, `babel.stack_interpreter` for stack,
+`babel.oisc_interpreter` for OISC, `babel.fungeoid_interpreter` for the
+fungeoid grid) remain importable and continue to enforce their original
+single-family contracts.
 """
 
 from __future__ import annotations
@@ -44,7 +46,7 @@ from babel.schema import (
     MetaParameters,
 )
 
-__version__ = "0.5.2"
+__version__ = "0.6.2"
 
 
 def run(
@@ -62,6 +64,7 @@ def run(
     * ``brainfuck_tape`` → :func:`babel.interpreter.run`
     * ``stack`` → :func:`babel.stack_interpreter.run`
     * ``oisc`` → :func:`babel.oisc_interpreter.run`
+    * ``fungeoid_2d`` → :func:`babel.fungeoid_interpreter.run`
     * any other value → :class:`babel.interpreter.InterpreterError`
 
     ``**kwargs`` is forwarded to the underlying runtime so callers can
@@ -92,9 +95,13 @@ def run(
         return stack_runtime.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
     if spec.base_machine == BaseMachine.OISC:
         return oisc_runtime.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
+    if spec.base_machine == BaseMachine.FUNGEOID_2D:
+        from babel import fungeoid_interpreter as fungeoid_runtime
+
+        return fungeoid_runtime.run(source, spec, stdin=stdin, stdout=stdout, **kwargs)
     raise tape_interpreter.InterpreterError(
         f"no runtime is implemented for base_machine={spec.base_machine.value}; "
-        "supported families are brainfuck_tape, stack, and oisc"
+        "supported families are brainfuck_tape, stack, oisc, and fungeoid_2d"
     )
 
 

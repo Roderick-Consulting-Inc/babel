@@ -196,6 +196,48 @@ class InstructionOp(str, Enum):
     # ("~50 LOC" runner-up) and src/babel/oisc_interpreter.py.
     SUBLEQ = "subleq"  # SUBLEQ a b c — mem[b] -= mem[a]; if mem[b] <= 0 jump to c.
 
+    # v0.6.0 — fungeoid 2D base machine (third Path B family after stack
+    # and OISC). Canonical exemplar is Befunge-93: an 80x25 torus grid of
+    # ASCII-character cells, a directional instruction pointer
+    # (right/left/up/down), and a data stack. See
+    # `babel.fungeoid_interpreter` and `examples/befunge.yaml` for the
+    # dialect specification.
+    #
+    # Naming convention: every op is prefixed `FUNGEOID_` to keep dispatch
+    # isolated from the (superficially overlapping) `STACK_*` family. The
+    # fungeoid ops do not reuse `STACK_ADD`/`STACK_DUP`/etc. — the
+    # fungeoid interpreter has no notion of "consume the next source atom
+    # as an operand" the way the stack tokenizer does, because in 2D-grid
+    # encoding every cell is its own atom; the cleanest way to honour
+    # that is its own op family. The cross-family `HALT` op (added in
+    # v0.2.0) is also legal on a fungeoid spec via Befunge's `@` token.
+    #
+    # The digit-push case is special: the canonical Befunge-93 dialect
+    # uses ten separate cell characters (`0`..`9`) for "push this digit",
+    # so the parameter sheet declares ten Instruction entries each with
+    # `op = FUNGEOID_PUSH_DIGIT`. The schema's per-op-uniqueness rule
+    # would normally reject duplicate ops; we relax that for this op
+    # alone — see `_instructions_unique` for the carve-out.
+    FUNGEOID_PUSH_DIGIT = "fungeoid_push_digit"
+    FUNGEOID_DIR_RIGHT = "fungeoid_dir_right"  # `>`
+    FUNGEOID_DIR_LEFT = "fungeoid_dir_left"  # `<`
+    FUNGEOID_DIR_UP = "fungeoid_dir_up"  # `^`
+    FUNGEOID_DIR_DOWN = "fungeoid_dir_down"  # `v`
+    FUNGEOID_STACK_ADD = "fungeoid_stack_add"  # `+`
+    FUNGEOID_STACK_SUB = "fungeoid_stack_sub"  # `-` pop b then a; push a - b
+    FUNGEOID_STACK_MUL = "fungeoid_stack_mul"  # `*`
+    FUNGEOID_STACK_DIV = "fungeoid_stack_div"  # `/` pop b then a; push a // b; b==0 pushes 0 (Befunge)
+    FUNGEOID_STACK_DUP = "fungeoid_stack_dup"  # `:` dup of empty stack pushes 0
+    FUNGEOID_STACK_SWAP = "fungeoid_stack_swap"  # `\` swap; zero-fills if <2 elements
+    FUNGEOID_STACK_POP = "fungeoid_stack_pop"  # `$` pop of empty is no-op
+    FUNGEOID_OUTPUT_INT = "fungeoid_output_int"  # `.` Befunge appends a trailing space
+    FUNGEOID_OUTPUT_CHAR = "fungeoid_output_char"  # `,` emit low byte as ASCII char
+    FUNGEOID_IF_HORIZONTAL = "fungeoid_if_horizontal"  # `_` pop: if 0 go right, else left
+    FUNGEOID_IF_VERTICAL = "fungeoid_if_vertical"  # `|` pop: if 0 go down, else up
+    FUNGEOID_STRING_MODE_TOGGLE = "fungeoid_string_mode_toggle"  # `"` toggle string mode
+    FUNGEOID_BRIDGE = "fungeoid_bridge"  # `#` skip the next cell
+    FUNGEOID_NOOP = "fungeoid_noop"  # ` ` (space) — no-op cell
+
 
 # Operations that are only valid on a Brainfuck-tape base machine.
 _TAPE_OPS: frozenset[InstructionOp] = frozenset(
@@ -278,6 +320,40 @@ _STACK_OPS: frozenset[InstructionOp] = frozenset(
         InstructionOp.STACK_GREATER,
         InstructionOp.STACK_ROT,
         # Cross-family ops legal on a stack machine too.
+        InstructionOp.HALT,
+    }
+)
+
+# Operations that are only valid on a fungeoid 2D base machine (v0.6.0).
+# The discipline matches the stack family: every op enumerated here must
+# have a clause in the dispatch chain of `fungeoid_interpreter.run`. The
+# universal `HALT` op is also legal — Befunge's `@` token wires to HALT
+# in `examples/befunge.yaml`. There is no per-machine "canonical minimum"
+# enforced beyond the negative rule (the spec rejects ops that don't
+# belong to a fungeoid runtime); a 2D-grid language can subset freely
+# in the way Smallfuck subsets canonical Brainfuck.
+_FUNGEOID_OPS: frozenset[InstructionOp] = frozenset(
+    {
+        InstructionOp.FUNGEOID_PUSH_DIGIT,
+        InstructionOp.FUNGEOID_DIR_RIGHT,
+        InstructionOp.FUNGEOID_DIR_LEFT,
+        InstructionOp.FUNGEOID_DIR_UP,
+        InstructionOp.FUNGEOID_DIR_DOWN,
+        InstructionOp.FUNGEOID_STACK_ADD,
+        InstructionOp.FUNGEOID_STACK_SUB,
+        InstructionOp.FUNGEOID_STACK_MUL,
+        InstructionOp.FUNGEOID_STACK_DIV,
+        InstructionOp.FUNGEOID_STACK_DUP,
+        InstructionOp.FUNGEOID_STACK_SWAP,
+        InstructionOp.FUNGEOID_STACK_POP,
+        InstructionOp.FUNGEOID_OUTPUT_INT,
+        InstructionOp.FUNGEOID_OUTPUT_CHAR,
+        InstructionOp.FUNGEOID_IF_HORIZONTAL,
+        InstructionOp.FUNGEOID_IF_VERTICAL,
+        InstructionOp.FUNGEOID_STRING_MODE_TOGGLE,
+        InstructionOp.FUNGEOID_BRIDGE,
+        InstructionOp.FUNGEOID_NOOP,
+        # Cross-family ops legal on a fungeoid machine too.
         InstructionOp.HALT,
     }
 )
@@ -501,7 +577,14 @@ class LanguageSpec(BaseModel):
         if len(set(tokens)) != len(tokens):
             duplicates = sorted({t for t in tokens if tokens.count(t) > 1})
             raise ValueError(f"duplicate instruction tokens: {duplicates}")
-        ops = [i.op for i in v]
+        # Per-op uniqueness with one carve-out: FUNGEOID_PUSH_DIGIT is the
+        # cell-character-as-literal pattern (Befunge-93's `0`..`9` each push
+        # the digit value), and the only sensible way to declare it on a
+        # parameter sheet is ten Instruction entries that share the op but
+        # carry different tokens. The token-uniqueness rule above still
+        # catches accidental dup-token bugs; we relax only the op rule for
+        # this one op.
+        ops = [i.op for i in v if i.op != InstructionOp.FUNGEOID_PUSH_DIGIT]
         if len(set(ops)) != len(ops):
             duplicates = sorted({o.value for o in ops if ops.count(o) > 1})
             raise ValueError(f"duplicate instruction ops: {duplicates}")
@@ -651,6 +734,31 @@ class LanguageSpec(BaseModel):
                 "stack language defines operations that don't apply to a stack "
                 f"machine: {sorted(o.value for o in illegal)}; legal stack ops are "
                 f"{sorted(o.value for o in _STACK_OPS)}"
+            )
+        return self
+
+    @model_validator(mode="after")
+    def _check_fungeoid_ops_legal(self) -> LanguageSpec:
+        """A fungeoid 2D language must reference only fungeoid-legal ops.
+
+        Parallel to ``_check_stack_ops_legal`` — a negative-only rule.
+        A fungeoid spec cannot reference ops that have no defined
+        semantics on a 2D grid + stack machine (e.g. tape pointer
+        movement, BF loop brackets, SUBLEQ). The fungeoid interpreter's
+        dispatch table is the source of truth — see ``_FUNGEOID_OPS``
+        above. There is no canonical-minimum op set enforced here; a
+        fungeoid language may subset Befunge-93 freely (a "halt and
+        nothing else" 2D grid still validates).
+        """
+        if self.base_machine != BaseMachine.FUNGEOID_2D:
+            return self
+        defined_ops = {i.op for i in self.instructions}
+        illegal = defined_ops - _FUNGEOID_OPS
+        if illegal:
+            raise ValueError(
+                "fungeoid_2d language defines operations that don't apply to a 2D "
+                f"grid machine: {sorted(o.value for o in illegal)}; legal fungeoid "
+                f"ops are {sorted(o.value for o in _FUNGEOID_OPS)}"
             )
         return self
 

@@ -1,0 +1,215 @@
+# Copyright 2026 Roderick Consulting Inc.
+# Licensed under the Apache License, Version 2.0.
+# See ../LICENSE for the full license text.
+#
+# Befunge-93 — Babel's first fungeoid 2D parameter sheet (v0.6.0).
+#
+# Befunge-93 (Pressey, 1993) is the canonical fungeoid: an 80x25 toroidal
+# grid of ASCII-character cells, a directional instruction pointer
+# (right/left/up/down) starting at (0, 0) heading right, and a data stack.
+# Each cell holds one ASCII character that's an instruction. The IP wraps
+# at all four edges. The data stack stores integers.
+#
+# This sheet covers the minimum-viable Babel subset (v0.6.0):
+#   * Direction: > < ^ v
+#   * Digits 0..9 (push the digit value)
+#   * Arithmetic: + - * /  (silent zero on /0, Befunge convention)
+#   * Stack manipulation: : (dup), \ (swap), $ (pop)
+#   * I/O: . (print int + trailing space), , (print char)
+#   * Conditionals: _ (horizontal), | (vertical)
+#   * String mode: "
+#   * Bridge: # (skip next cell)
+#   * Halt: @
+#   * No-op: space
+#
+# Deferred (a follow-up sheet can extend this one):
+#   * p / g — self-modifying grid put/get
+#   * ? — random direction
+#   * & / ~ — input integer / input character
+#
+# Reference: https://esolangs.org/wiki/Befunge
+#
+# Babel-fit: fungeoid_2d base machine, grid_2d_torus memory shape,
+# arbitrary cell width (Befunge stack values are wide ints in practice),
+# two_dimensional_grid encoding. The IP advances toroidally; the schema's
+# `_check_2d_encoding` validator enforces the encoding pairing.
+
+name: Befunge-93
+version: "0.1.0"
+description: |
+  The canonical fungeoid 2D programming language (Chris Pressey, 1993).
+  Programs are rectangular grids of ASCII characters; a directional
+  instruction pointer walks the grid, dispatching the character it lands
+  on as one instruction. Cells include direction-changers (`>` `<` `^`
+  `v`), digit-pushers (`0`..`9`), the eight standard arithmetic and
+  stack-manipulation ops, two I/O ops (integer and character), two
+  conditionals (`_` horizontal and `|` vertical), string mode (`"`
+  toggles whether subsequent cells are pushed as ASCII codepoints or
+  dispatched as ops), the bridge `#` (skip the next cell), and the halt
+  `@`. The IP wraps toroidally at all four edges. The stack is unbounded.
+
+base_machine: fungeoid_2d
+memory_shape: 2d_torus
+cell_width: arbitrary
+encoding: two_dimensional_grid
+io: character
+theme: befunge
+source_extension: .befunge
+
+instructions:
+  # Direction
+  - token: ">"
+    op: fungeoid_dir_right
+    description: "Set the IP direction to right."
+  - token: "<"
+    op: fungeoid_dir_left
+    description: "Set the IP direction to left."
+  - token: "^"
+    op: fungeoid_dir_up
+    description: "Set the IP direction to up."
+  - token: "v"
+    op: fungeoid_dir_down
+    description: "Set the IP direction to down."
+
+  # Digit literals — the ten tokens 0..9 all map to FUNGEOID_PUSH_DIGIT;
+  # the digit value is read from the cell character at dispatch time.
+  - token: "0"
+    op: fungeoid_push_digit
+    description: "Push 0 onto the stack."
+  - token: "1"
+    op: fungeoid_push_digit
+    description: "Push 1 onto the stack."
+  - token: "2"
+    op: fungeoid_push_digit
+    description: "Push 2 onto the stack."
+  - token: "3"
+    op: fungeoid_push_digit
+    description: "Push 3 onto the stack."
+  - token: "4"
+    op: fungeoid_push_digit
+    description: "Push 4 onto the stack."
+  - token: "5"
+    op: fungeoid_push_digit
+    description: "Push 5 onto the stack."
+  - token: "6"
+    op: fungeoid_push_digit
+    description: "Push 6 onto the stack."
+  - token: "7"
+    op: fungeoid_push_digit
+    description: "Push 7 onto the stack."
+  - token: "8"
+    op: fungeoid_push_digit
+    description: "Push 8 onto the stack."
+  - token: "9"
+    op: fungeoid_push_digit
+    description: "Push 9 onto the stack."
+
+  # Arithmetic
+  - token: "+"
+    op: fungeoid_stack_add
+    description: "Pop two values; push their sum."
+  - token: "-"
+    op: fungeoid_stack_sub
+    description: "Pop top (b), then second (a); push a - b."
+  - token: "*"
+    op: fungeoid_stack_mul
+    description: "Pop two values; push their product."
+  - token: "/"
+    op: fungeoid_stack_div
+    description: "Pop top (b), then second (a); push integer a // b. Divide-by-zero pushes 0 (Befunge convention)."
+
+  # Stack manipulation
+  - token: ":"
+    op: fungeoid_stack_dup
+    description: "Duplicate the top of stack (dup of empty stack pushes 0)."
+  - token: "\\"
+    op: fungeoid_stack_swap
+    description: "Swap the top two stack elements (zero-fills if fewer than two)."
+  - token: "$"
+    op: fungeoid_stack_pop
+    description: "Pop the top of stack (no-op on an empty stack)."
+
+  # I/O
+  - token: "."
+    op: fungeoid_output_int
+    description: "Pop and print the value as a decimal integer followed by a single space."
+  - token: ","
+    op: fungeoid_output_char
+    description: "Pop and print the low byte as an ASCII character."
+
+  # Conditionals
+  - token: "_"
+    op: fungeoid_if_horizontal
+    description: "Pop a value; if 0 head right, else head left."
+  - token: "|"
+    op: fungeoid_if_vertical
+    description: "Pop a value; if 0 head down, else head up."
+
+  # String mode and bridge
+  - token: "\""
+    op: fungeoid_string_mode_toggle
+    description: "Toggle string mode: while on, every cell pushes its ASCII codepoint instead of dispatching."
+  - token: "#"
+    op: fungeoid_bridge
+    description: "Skip the next cell (advance the IP one extra step after this dispatch)."
+
+  # Halt and no-op
+  - token: "@"
+    op: halt
+    description: "End the program cleanly."
+  - token: " "
+    op: fungeoid_noop
+    description: "Space cell — no-op; the IP just advances."
+
+additions: []
+removals:
+  # The v0.6.0 subset defers four canonical Befunge-93 ops; documented
+  # in the module docstring of `babel.fungeoid_interpreter`.
+  - "p (put) — self-modifying grid write"
+  - "g (get) — self-modifying grid read"
+  - "? — random direction"
+  - "& and ~ — input integer / character"
+
+meta:
+  complexity: medium
+  abstraction: low
+  verbosity: compact
+  playfulness: moderate
+  unpredictability: zero
+  naturalness: none
+
+examples:
+  - title: "Push 2 and print it"
+    source: "2.@"
+    expected_output: "2 "
+    description: >
+      Pushes 2, prints it as an integer (Befunge appends a trailing
+      space after `.`), then halts. The minimum non-trivial program.
+
+  - title: "Arithmetic: 5 + 4"
+    source: "54+.@"
+    expected_output: "9 "
+    description: >
+      Pushes 5, pushes 4, pops both and pushes their sum (9), prints,
+      halts. Demonstrates digit-push + arithmetic + integer output.
+
+  - title: "Hello World!"
+    source: '"!dlroW olleH">:#,_@'
+    expected_output: "Hello World!"
+    description: >
+      The canonical Befunge-93 Hello World. Toggles string mode and
+      pushes the characters of "Hello World!" in reverse (so `H` ends up
+      on top), then enters a print loop: dup the top, bridge over the
+      `,`, then the horizontal-if `_` sends control left when the top
+      is non-zero. Going left, the IP hits `,` (prints the dup), then
+      `#` bridges over `:`, then `>` resets direction. When the implicit
+      zero is finally popped (after every character has been printed),
+      `_` sends control right and the IP hits `@` to halt.
+
+  - title: "Output a character via string mode"
+    source: '"A",@'
+    expected_output: "A"
+    description: >
+      Toggles string mode, pushes 65 (the ASCII codepoint of `A`),
+      toggles string mode off, pops and prints the value as an ASCII
+      character, halts.
