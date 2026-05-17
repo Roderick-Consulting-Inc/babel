@@ -1,0 +1,84 @@
+# Subleq — the canonical One Instruction Set Computer (OISC).
+#
+# "SUbtract and Branch if Less than or EQual to zero": a single
+# instruction `SUBLEQ a b c` that subtracts mem[a] from mem[b], stores
+# the result, and jumps to instruction c if the new mem[b] is ≤ 0.
+# Despite the trivial instruction set, Subleq is Turing-complete and
+# can implement arbitrary computation through self-modifying code.
+#
+# Reference: https://esolangs.org/wiki/Subleq, https://esolangs.org/wiki/OISC
+#
+# Babel-fit: oisc base machine, 1d_unbounded memory (the program *is* the
+# memory, self-modifying), arbitrary-precision integer cells,
+# whitespace_separated_tokens encoding. The single instruction has
+# `arity: 3` — each occurrence of the token (in this dialect the
+# instruction is *implicit*: the source is just bare integers, three at a
+# time) consumes three operand atoms.
+#
+# See src/babel/oisc_interpreter.py for the dialect specification,
+# including the I/O port convention (address -1) and halt convention
+# (c < 0).
+
+name: Subleq
+version: "0.1.0"
+description: |
+  The canonical One Instruction Set Computer. The only instruction,
+  `SUBLEQ a b c`, subtracts the value at memory address `a` from the
+  value at address `b`, stores the result back at `b`, and jumps to
+  instruction `c` if the new value at `b` is less than or equal to
+  zero. Despite its triviality, Subleq is Turing-complete: any
+  computation expressible by a Turing machine can be expressed in
+  Subleq, through extensive use of self-modifying code.
+
+base_machine: oisc
+memory_shape: 1d_unbounded
+cell_width: arbitrary
+encoding: whitespace_separated_tokens
+io: character
+theme: oisc
+source_extension: .sub
+
+instructions:
+  # In Subleq the instruction is implicit — every triple of integers IS
+  # a SUBLEQ. We still register a surface "token" for parameter-sheet
+  # bookkeeping (the schema requires at least one Instruction entry),
+  # but the OISC interpreter ignores the token and walks the integer
+  # stream directly in triples.
+  - token: "subleq"
+    op: subleq
+    arity: 3
+    description: "SUBLEQ a b c: mem[b] -= mem[a]; if mem[b] ≤ 0 jump to c."
+
+additions: []
+removals: []
+
+meta:
+  complexity: high
+  abstraction: high
+  verbosity: verbose
+  playfulness: low
+  unpredictability: zero
+  naturalness: none
+
+examples:
+  - title: "Halt immediately"
+    source: "0 0 -1"
+    expected_output: ""
+    description: >
+      Subtracts mem[0] from mem[0] (= 0), result is 0 which is ≤ 0,
+      then the jump target c = -1 triggers the halt convention. The
+      shortest valid Subleq program.
+
+  - title: "Print 'A' (decimal 65)"
+    source: "6 -1 3   0 0 -1   65 0 0"
+    expected_output: "A"
+    description: >
+      Three triples (9 atoms total — Subleq requires a multiple of 3).
+      Triple 1 (`6 -1 3`) is an OUTPUT step: b = -1 means "emit low
+      byte of mem[a]"; here mem[6] = 65 = 'A'. The jump target c = 3
+      takes us to triple 2. Triple 2 (`0 0 -1`) is the halt idiom —
+      mem[0]-mem[0] = 0 (so the conditional jump would fire), and
+      c = -1 triggers the halt convention. The third "triple"
+      (`65 0 0`) is data + filler: atom 6 (`65`) holds the character
+      to print; atoms 7 and 8 are zero padding so the parser sees a
+      multiple-of-3 atom count and are never executed.
