@@ -24,6 +24,8 @@ The two artifacts share the foundation documents (`01`–`03`) below. Each gets 
 | 04 | `04-whitepaper-babel.md` | Babel as a generator: methodology, parameter axes, value to academia/education | Draft 1 |
 | 05 | `05-whitepaper-inflexion.md` | The Inflexión language: Romance grammar as semantic substrate, coupling with generative AI for prompting precision | Draft 1 (lives in the [Inflexion repository](https://github.com/Roderick-Consulting-Inc/inflexion) under `plans/`) |
 | 06 | `06-objections.md` | Frequently anticipated objections from each named constituency, with current best replies | Draft 1 (living document) |
+| 07 | `07-whitepaper-llm-oriented-pl.md` | LLM-oriented programming languages — the design space, prior art, and our wager | Draft 1 |
+| 08 | `08-witness-across-families.md` | What a step debugger across eight esolang families taught us about implementation residue, observable-shape-as-design, and the protocol-as-public-interface accretion | Draft 1 (2026-05-18) |
 
 ## Citation infrastructure
 
