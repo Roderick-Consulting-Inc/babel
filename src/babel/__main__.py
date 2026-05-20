@@ -13,16 +13,18 @@
 # limitations under the License.
 """Command-line entry point for the Babel runtime.
 
-Two subcommands:
+Three subcommands — the methodology paper's three lockstep outputs:
 
 * ``babel run <yaml> --program <source>`` — interpret ``source`` against
   the language defined by the YAML parameter sheet, writing output to
   stdout.
 * ``babel transpile <yaml> --program <source>`` — transpile ``source``
   to vanilla Brainfuck, writing the lowered source to stdout.
+* ``babel spec <yaml>`` — emit the language's Markdown specification
+  page to stdout. No program input.
 
-Either subcommand can read the program from stdin instead by passing
-``--program -``.
+``run`` and ``transpile`` can read the program from stdin instead by
+passing ``--program -``.
 """
 
 from __future__ import annotations
@@ -32,6 +34,7 @@ import sys
 
 from babel import run  # base-machine-dispatching entry point (v0.4.0)
 from babel.loader import load_spec
+from babel.spec import render_spec
 from babel.transpiler import transpile
 
 
@@ -61,9 +64,17 @@ def main(argv: list[str] | None = None) -> int:
         help="program source string, or '-' to read from stdin",
     )
 
+    p_spec = sub.add_parser("spec", help="emit the language's Markdown specification page")
+    p_spec.add_argument("yaml", help="path to the language parameter sheet (YAML)")
+
     args = parser.parse_args(argv)
 
     spec = load_spec(args.yaml)
+
+    if args.command == "spec":
+        sys.stdout.write(render_spec(spec))
+        return 0
+
     program = _read_program(args.program)
 
     if args.command == "run":

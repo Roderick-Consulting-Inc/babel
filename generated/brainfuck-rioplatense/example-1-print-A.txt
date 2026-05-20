@@ -1,0 +1,7 @@
+$ python3 -m babel run examples/brainfuck-rioplatense.yaml \
+    --program "más más más más más más más más mientras che más más más más más más más más vení menos ya che más decí"
+A
+
+$ python3 -m babel transpile examples/brainfuck-rioplatense.yaml \
+    --program "más más más más más más más más mientras che más más más más más más más más vení menos ya che más decí"
+++++++++[>++++++++<-]>+.

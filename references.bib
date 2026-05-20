@@ -526,232 +526,318 @@
 % Vigil, Taxi, Folders, Velato, Beatnik, Chicken, Unary.
 
 % --- Installment 07 citations: 2024-2026 LLM-oriented PL design field ---
-% Surfaced 2026-05-13 in the 07 lit pass (53-artifact field survey).
-% All entries below are stubs; CONFIRM authorship + venue before publication.
+% Seeded 2026-05-13 from the 53-artifact field survey; canonical citations
+% verified 2026-05-17 against arXiv, ACL Anthology, ACM DL, the LMPL 2025
+% proceedings (Singapore, Oct 2025), the LMPL 2026 CFP page (Oakland),
+% project repos, and the practitioner ecosystem.
+% Per-entry verification details: research-notes/lit-pass-2026-05-17.md §1.
+% Citation keys preserved verbatim for 04/07 stability even where the
+% canonical year of the artifact differs from the key's year suffix.
 
-@unpublished{sun_token_sugar_2025,
-  title        = {Token Sugar: Generalising {LLM}-Oriented Grammar Stripping Across Programming Languages},
-  author       = {Sun, Zhensu and others},
+@inproceedings{sun_token_sugar_2025,
+  title        = {Token Sugar: Making Source Code Sweeter for {LLMs} through Token-Efficient Shorthand},
+  author       = {Sun, Zhensu and Yang, Chengran and Du, Xiaoning and Yang, Zhou and Li, Li and Lo, David},
+  booktitle    = {Proceedings of the 40th {IEEE}/{ACM} International Conference on Automated Software Engineering ({ASE} 2025)},
   year         = {2025},
-  note         = {Follow-up to Sun et al.'s SimPy (sun_simpy_2024); same Singapore Management University group. Generalises the formatting-strip move to languages beyond Python. Surfaced 2026-05-13. CONFIRM authorship + venue before publication.},
+  eprint       = {2512.08266},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2512.08266},
+  note         = {Follow-up to SimPy (sun_simpy_2024). 799 (code-pattern, shorthand) pairs replace verbose idioms; up to 15.1\% source-token reduction and 11.2\% generation-token reduction while preserving Pass@1.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{liu_shortcoder_2026,
-  title        = {{ShortCoder}: Knowledge-Augmented Syntax Optimisation for {LLM}-Generated Code},
-  author       = {Liu and others},
+@misc{liu_shortcoder_2026,
+  title        = {{ShortCoder}: Knowledge-Augmented Syntax Optimization for Token-Efficient Code Generation},
+  author       = {Liu, Sicong and Huang, Yanxian and Liu, Mingwei and Chen, Jiachi and Shi, Ensheng and Ma, Yuchi and Zhang, Hongyu and Zhang, Yin and Wang, Yanlin},
   year         = {2026},
-  note         = {Rule-based syntax rewriting plus LLM-guided refinement; pipeline tool, not a new language. Surfaced 2026-05-13. CONFIRM authorship + venue before publication.},
+  eprint       = {2601.09703},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2601.09703},
+  note         = {Knowledge-augmented framework that rewrites code to a more token-efficient form while preserving semantics and readability; complements SimPy and Token Sugar at the rule-plus-LLM-refinement layer.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{shortendoc_2025,
-  title        = {{ShortenDoc}: Compressing Documentation for {LLM} Context Budgets},
-  author       = {{Anonymous}},
+@article{shortendoc_2025,
+  title        = {Less is More: {DocString} Compression in Code Generation},
+  author       = {Yang, Guang and Zhou, Yu and Cheng, Wei and Chen, Xiang and Zhang, Xiangyu and Zhuo, Terry Yue and Chen, Taolue and Pan, Jiantao and Lo, David},
+  journal      = {{ACM} Transactions on Software Engineering and Methodology ({TOSEM})},
   year         = {2025},
-  note         = {Adjacent to Pan et al.'s hidden-cost work; documents the formatting-tax phenomenon at the docstring layer. Surfaced 2026-05-13. CONFIRM authorship + venue before publication.},
+  doi          = {10.1145/3735636},
+  eprint       = {2410.22793},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2410.22793},
+  note         = {Originally circulated as the ShortenDoc preprint (2024). Iterative docstring-token pruning achieves 25--40\% prompt compression with negligible Pass@1 drop across six benchmarks and eleven LLMs. Cited in earlier drafts as ``ShortenDoc'' (the system name); the canonical paper title is the one above.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{b_ir_2025,
-  title        = {{B-IR}: A Byte-Encoded Intent Representation for Tokenizer-Aligned Code},
-  author       = {{Anonymous}},
+@misc{b_ir_2025,
+  title        = {{B-IR} --- An {LLM}-Optimised Programming Language},
+  author       = {Hall, Jason},
   year         = {2025},
-  note         = {Practitioner artifact: intentionally non-human-readable, tokenizer-aligned-by-construction code representation. Surfaced 2026-05-13. CONFIRM authorship + venue before publication.},
+  howpublished = {Hacker News ``Show HN'' post and {GitHub} project},
+  url          = {https://news.ycombinator.com/item?id=46583581},
+  note         = {Practitioner experiment in LLM-targeted PL design exploring ``validation locality'' and interleaved tests; explicitly an exploratory afternoon project, not a published paper. The seed-bib gloss of ``byte-encoded intent representation'' overstates the actual artifact; the design surfaced in the HN thread and the author's GitHub (\url{https://github.com/imjasonh}) is closer to a validation-locality LLM-target experiment.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{youvan_tokenese_2025,
-  title        = {Tokenese: A Constructed Natural Language Designed for {AI} Tokenisation},
+@misc{youvan_tokenese_2025,
+  title        = {Tokenese: Designing a Human Language Optimized for {AI} Tokenization and Efficient Communication},
   author       = {Youvan, Douglas C.},
   year         = {2025},
-  note         = {Position paper arguing that natural-language irregularities are inefficient for AI tokenisation; proposes a constructed Esperanto-like alternative. Surfaced 2026-05-13. CONFIRM venue.},
+  howpublished = {{ResearchGate} self-published preprint},
+  url          = {https://www.researchgate.net/publication/389676635_Tokenese_Designing_a_Human_Language_Optimized_for_AI_Tokenization_and_Efficient_Communication},
+  note         = {Constructed natural language co-designed with {GPT-4o} for low-ambiguity, logical-operator-rich, regular-morphology AI-human communication. No peer-reviewed venue.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{toon_spec_2025,
-  title        = {{TOON}: A Tokenizer-Optimised Object Notation},
+@misc{toon_spec_2025,
+  title        = {{TOON} --- Token-Oriented Object Notation (Specification and Reference Implementation)},
   author       = {{TOON Contributors}},
   year         = {2025},
-  note         = {Structured-data markup designed to minimise LLM token consumption versus JSON/YAML; ~40\% reduction reported on canonical benchmarks. Surfaced 2026-05-13. CONFIRM authorship + canonical citation.},
+  howpublished = {Community specification, \texttt{toon-format} {GitHub} organisation},
+  url          = {https://github.com/toon-format/spec},
+  note         = {Released November 2025. YAML-like indentation plus CSV-like uniform-array layout; the spec's own benchmark reports approximately 40\% token reduction versus JSON on uniform tabular data and 76.4\% accuracy (vs JSON 75.0\%) on the spec's retrieval test. Reference implementation: \url{https://github.com/toon-format/toon}.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{vaziri_pdl_2025,
-  title        = {{PDL}: A {YAML}-Based Declarative Prompt Description Language},
-  author       = {Vaziri, Mandana and others},
+@misc{vaziri_pdl_2025,
+  title        = {{PDL}: A Declarative Prompt Programming Language},
+  author       = {Vaziri, Mandana and Mandel, Louis and Hirzel, Martin and others},
+  year         = {2024},
+  eprint       = {2410.19135},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2410.19135},
+  note         = {IBM Research. YAML-based declarative language with \texttt{model}/\texttt{text}/\texttt{if}/\texttt{for} blocks; LLM prompt is a first-class construct; targets chatbots, RAG and agents. Reference implementation: \url{https://github.com/IBM/prompt-declaration-language}. Follow-up appeared at the ICML 2025 PRAL workshop (arXiv 2507.06396). Citation key retains the 2025 suffix for 04/07 stability; canonical year of the preprint is 2024.},
+  keywords     = {lengua, babel}
+}
+
+@misc{hannecke_format_2025,
+  title        = {Beyond {JSON}: Picking the Right Format for {LLM} Pipelines ({LLM} Structured Output: {JSON}, {YAML}, {XML} \& {TOON})},
+  author       = {Hannecke, Michael},
   year         = {2025},
-  note         = {IBM Research declarative prompt language. Targets the structured-data / prompt boundary rather than the executable-code boundary. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  howpublished = {Medium blog post},
+  url          = {https://medium.com/@michael.hannecke/beyond-json-picking-the-right-format-for-llm-pipelines-b65f15f77f7d},
+  note         = {Practitioner benchmark across JSON, YAML, XML and TOON. Reports TOON at 73.9\% vs JSON at 69.7\% accuracy across 209 retrieval questions; flags TOON's tooling gap as the main adoption barrier. Complements Sun et al.'s input-side observation with output-side measurements.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{hannecke_format_2025,
-  title        = {{JSON} vs {YAML} vs {Markdown} vs {TOON}: A Practitioner Benchmark of Output-Format Token Costs},
-  author       = {Hannecke and others},
-  year         = {2025},
-  note         = {Practitioner benchmark surfaced 2026-05-13. Complements Sun et al.'s input-side observation with output-side measurements. CONFIRM authorship + canonical citation.},
-  keywords     = {lengua, babel}
-}
-
-@unpublished{dong_xgrammar_2024,
-  title        = {{XGrammar}: Flexible and Efficient Structured Generation for Large Language Models},
+@misc{dong_xgrammar_2024,
+  title        = {{XGrammar}: Flexible and Efficient Structured Generation Engine for Large Language Models},
   author       = {Dong, Yixin and others},
   year         = {2024},
-  note         = {Context-free-grammar-constrained decoding; one of the foundational grammar-constrained decoding artifacts. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  eprint       = {2411.15100},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2411.15100},
+  note         = {Splits the CFG-decoder vocabulary into context-independent (prechecked) and context-dependent (runtime-checked) tokens with a persistent stack; reports up to a 100x speedup over prior grammar-constrained decoders. Now the default constrained-decoding backend in vLLM, SGLang, TensorRT-LLM and MLC-LLM. Reference implementation: \url{https://github.com/mlc-ai/xgrammar}.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{park_grammar_aligned_2024,
-  title        = {Grammar-Aligned Decoding for Large Language Models},
-  author       = {Park and others},
+@inproceedings{park_grammar_aligned_2024,
+  title        = {Grammar-Aligned Decoding},
+  author       = {Park, Kanghee and Wang, Jiayu and Berg-Kirkpatrick, Taylor and Polikarpova, Nadia and D'Antoni, Loris},
+  booktitle    = {Advances in Neural Information Processing Systems ({NeurIPS}) 38},
   year         = {2024},
-  note         = {Grammar-constrained decoding with output-distribution alignment to the grammar. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  eprint       = {2405.21047},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2405.21047},
+  note         = {Argues that grammar-constrained decoding distorts the LLM's output distribution; introduces the ASAp adaptive-sampling procedure that conditions on grammar acceptance while matching the model's true conditional distribution.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{lmql_2024,
-  title        = {{LMQL}: Language Model Query Language},
+@article{lmql_2024,
+  title        = {Prompting Is Programming: A Query Language for Large Language Models},
   author       = {Beurer-Kellner, Luca and Fischer, Marc and Vechev, Martin},
-  year         = {2024},
-  note         = {Foundational language-that-runs-LLMs artifact. Surfaced 2026-05-13. CONFIRM canonical citation form (multiple papers exist; ICML / arXiv variants).},
+  journal      = {Proceedings of the {ACM} on Programming Languages ({PACMPL})},
+  year         = {2023},
+  note         = {Originally posted as arXiv 2212.06094 (2022). The canonical venue is PLDI 2023 / PACMPL. Declarative SQL-like plus imperative-scripting language for LLM queries with constraints and control flow; reports 26--85\% inference-cost savings via compiled procedures. Citation key retains the 2024 suffix for 04/07 stability.},
+  doi          = {10.1145/3591300},
+  eprint       = {2212.06094},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2212.06094},
   keywords     = {lengua, babel}
 }
 
-@unpublished{dspy_2025,
-  title        = {{DSPy}: Compiling Declarative Language-Model Calls into Self-Improving Pipelines},
+@inproceedings{dspy_2025,
+  title        = {{DSPy}: Compiling Declarative Language Model Calls into Self-Improving Pipelines},
   author       = {Khattab, Omar and others},
-  year         = {2025},
-  note         = {Typed signatures plus compiler-style optimiser for LLM pipelines. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  booktitle    = {International Conference on Learning Representations ({ICLR}) 2024},
+  year         = {2024},
+  eprint       = {2310.03714},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2310.03714},
+  note         = {Stanford NLP, large multi-author list. Typed signatures, modules and a compiler-style optimiser turn LLM pipelines into programs that self-bootstrap and beat hand-prompted baselines by 25--65\%. Reference implementation: \url{https://github.com/stanfordnlp/dspy}. Citation key retains the 2025 suffix for 04/07 stability.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{sglang_2025,
-  title        = {{SGLang}: A Programming Language and Runtime for Large Language Model Inference},
+@inproceedings{sglang_2025,
+  title        = {{SGLang}: Efficient Execution of Structured Language Model Programs},
   author       = {Zheng, Lianmin and others},
-  year         = {2025},
-  note         = {Co-designed PL plus runtime for LLM inference workloads. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  booktitle    = {Advances in Neural Information Processing Systems ({NeurIPS}) 38},
+  year         = {2024},
+  eprint       = {2312.07104},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2312.07104},
+  note         = {UC Berkeley plus Stanford / SJTU / TAMU co-authors. Frontend language plus runtime with RadixAttention KV-cache reuse and compressed FSM constraints; co-designed PL for structured LM programs. Citation key retains the 2025 suffix for 04/07 stability.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{dong_appl_2025,
-  title        = {{APPL}: A Prompt Programming Language Embedded in {Python}},
-  author       = {Dong, Honghua and others},
+@inproceedings{dong_appl_2025,
+  title        = {{APPL}: A Prompt Programming Language for Harmonious Integration of Programs and Large Language Model Prompts},
+  author       = {Dong, Honghua and Su, Qidong and Gao, Yubo and Li, Zhaoyu and Ruan, Yangjun and Pekhimenko, Gennady and Maddison, Chris J. and Si, Xujie},
+  booktitle    = {Proceedings of the 63rd Annual Meeting of the Association for Computational Linguistics ({ACL}) (Long Papers)},
   year         = {2025},
-  note         = {Python-embedded prompt programming with async runtime. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  url          = {https://aclanthology.org/2025.acl-long.63/},
+  eprint       = {2406.13161},
+  eprinttype   = {arXiv},
+  note         = {Python-embedded prompt programming with async parallel runtime plus tracing and replay; integrates prompts into Python functions and vice versa. Reference implementation: \url{https://github.com/appl-team/appl}.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{hu_plang_2025,
-  title        = {{Plang}: A Natural-Language-Augmented Programming Language with Control-Flow Markers},
-  author       = {Hu and others},
+@article{hu_plang_2025,
+  title        = {{Plang}: Efficient Prompt Engineering Language for Blending Natural Language and Control Flow in Large Language Models},
+  author       = {Hu, Jingzhao and others},
+  journal      = {Expert Systems with Applications},
+  publisher    = {Elsevier},
   year         = {2025},
-  note         = {Blends natural-language prompt text with explicit control-flow markers. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  url          = {https://www.sciencedirect.com/science/article/pii/S0957417425037339},
+  note         = {Blends natural-language prompt text with explicit control-flow markers; positioned as a meta-intervention paradigm distinct from prompt-and-retry, pause-and-guide and process-control approaches.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{tan_pangolin_2025,
-  title        = {{Pangolin}: Best-of-{N} and Retry as a Selection Monad for {LLM} Programming},
-  author       = {Tan and others},
+@inproceedings{tan_pangolin_2025,
+  title        = {Programming Large Language Models with Algebraic Effect Handlers and the Selection Monad ({Pangolin})},
+  author       = {Tan, Shangyin and Wei, Guannan and Sen, Koushik and Zaharia, Matei},
+  booktitle    = {First International Workshop on Language Models and Programming Languages ({LMPL} 2025), Singapore},
   year         = {2025},
-  note         = {Makes best-of-N sampling and retries first-class language constructs via the selection monad. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  url          = {http://shangyit.me/_assets/files/lmpl2025-paper11.pdf},
+  note         = {UC Berkeley plus Tufts. Pangolin makes best-of-{N}, retry and other LM-control techniques first-class via algebraic effect handlers plus the selection monad; the choose-handler scores assertions and picks the best candidate.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{wang_lmpl_2025,
-  title        = {Effect-Handler-Based Prompt Programming},
-  author       = {Wang and others},
-  booktitle    = {LMPL Workshop at SPLASH 2025},
+@inproceedings{wang_lmpl_2025,
+  title        = {Composable Effect Handling for Programming {LLM}-Integrated Scripts},
+  author       = {Wang, Di},
+  booktitle    = {First International Workshop on Language Models and Programming Languages ({LMPL} 2025), Singapore},
   year         = {2025},
-  note         = {Separates LLM-script logic from effectful invocation via algebraic effect handlers. LMPL workshop paper. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  url          = {https://conf.researchr.org/details/icfp-splash-2025/lmpl-2025-papers/17/},
+  note         = {Peking University. Effect-handler-style separation of workflow logic from LLM-call effects; reports approximately 10x speedup on a Tree-of-Thoughts case study via parallelisation.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{bayazit_proof_2025,
-  title        = {Proof Assistants as {LLM} Targets: A Position from Existing Practice},
-  author       = {Bayazit and Li},
-  booktitle    = {LMPL Workshop at SPLASH 2025},
+@inproceedings{bayazit_proof_2025,
+  title        = {A Case Study on the Effectiveness of {LLMs} in Verification with Proof Assistants},
+  author       = {Bayaz{\i}t, Bar{\i}{\c{s}} and Li, Yao and Si, Xujie},
+  booktitle    = {First International Workshop on Language Models and Programming Languages ({LMPL} 2025), Singapore},
   year         = {2025},
-  note         = {Examines pre-existing proof-assistant languages as LLM-emission targets. Informs the PL-was-already-good-for-LLMs axis the position-paper wave largely ignores. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  url          = {https://pdxscholar.library.pdx.edu/compsci_fac/391/},
+  note         = {Evaluates LLM proof-generation in mature Rocq (Coq) projects; external context and dependencies improve automation, but performance is highly project-dependent.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{lmpl_2026_cfp,
-  title        = {Language Models and Programming Languages ({LMPL}) Workshop --- Second Edition Call for Papers},
-  author       = {{LMPL Organising Committee}},
+@misc{lmpl_2026_cfp,
+  title        = {Second International Workshop on Language Models and Programming Languages ({LMPL} 2026) --- Call for Papers},
+  author       = {Amin, Nada and Shi, Qingkai and Wei, Guannan and Zhang, Zhuo},
   year         = {2026},
-  note         = {Workshop at SPLASH 2026 in Oakland; submission deadline 26 Jun 2026. First edition held in Singapore 2025. Surfaced 2026-05-13. CONFIRM canonical URL.},
+  howpublished = {Workshop at {SPLASH}/{ISSTA} 2026, Oakland},
+  url          = {https://conf.researchr.org/home/splash-issta-2026/lmpl-2026},
+  note         = {Co-located with SPLASH/ISSTA 2026 in Oakland. 8--10pp research papers / 1--4pp extended abstracts; double-blind. Submission deadline 26 June 2026; notification 8 August 2026; camera-ready 21 August 2026. HotCRP: \url{https://lmpl26.hotcrp.com/}. No accepted papers listed at time of writing.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{du_wang_wang_2025,
-  title        = {Position: Programming-Language Design Should Be Reshaped Around {LLM} Cognition},
-  author       = {Du and Wang and Wang},
+@inproceedings{du_wang_wang_2025,
+  title        = {Position Paper: Programming Language Techniques for Bridging {LLM} Code Generation Semantic Gaps},
+  author       = {Du, Yalong and Wang, Chaozheng and Wang, Huaijin},
+  booktitle    = {First International Workshop on Language Models and Programming Languages ({LMPL} 2025), Singapore},
   year         = {2025},
-  note         = {Position paper. Argues vocabulary chosen from top-frequency BPE entries of the target LLM family would, in principle, ship every keyword in one token. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  doi          = {10.1145/3759425.3763383},
+  eprint       = {2507.09135},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2507.09135},
+  note         = {Argues that integrating PL techniques --- structured representations, formal verification, correctness guarantees --- is essential for moving LLM code generation from pattern matching to trustworthy reliability. The earlier seed gloss of ``vocabulary from top-frequency BPE entries'' was a misreading; the paper's actual thesis is broader.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{xing_cnlp_2025,
-  title        = {{CNL-P}: A Controlled-Natural-Language Programming Position Paper},
-  author       = {Xing and others},
+@misc{xing_cnlp_2025,
+  title        = {When Prompt Engineering Meets Software Engineering: {CNL-P} as Natural and Robust ``{APIs}'' for Human-{AI} Interaction},
+  author       = {Xing, Zhenchang and others},
   year         = {2025},
-  note         = {Position paper arguing for a controlled-natural-language interface to programming, tuned for LLM mediation. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  eprint       = {2508.06942},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2508.06942},
+  note         = {Controlled-natural-language prompt language with strict grammar / semantics; includes an NL2CNL-P conversion tool plus static-analysis linting for prompts.},
   keywords     = {lengua, babel}
 }
 
 @unpublished{mlds_2025,
   title        = {{MLDS}: Machine-Learning Domain-Specific Languages as a Class},
-  author       = {{Anonymous}},
+  author       = {{Unverified}},
   year         = {2025},
-  note         = {Position paper on ML-targeted DSLs as a coherent design category. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  note         = {UNVERIFIED. The 2026-05-17 lit pass could not locate a 2025 position paper matching this title and scope (see research-notes/lit-pass-2026-05-17.md \S5). The seed key may have been a notional placeholder rather than a real artifact. Pending a resolution decision, references to this key in 04/07 should be removed or replaced; the entry is retained here so the bibliography does not silently drop a key that is still cited.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{cao_nl_aligned_2025,
-  title        = {Toward a Natural-Language-Aligned Theorem Prover for {LLM} Co-Authorship},
-  author       = {Cao and Xie and Yan},
+@inproceedings{cao_nl_aligned_2025,
+  title        = {The {LLM} Era Demands Natural-Language-Aligned Theorem Provers for Mathematics},
+  author       = {Cao, Qinxiang and Xie, Lihan and Yan, Junchi},
+  booktitle    = {First International Workshop on Language Models and Programming Languages ({LMPL} 2025), Singapore},
   year         = {2025},
-  note         = {Position paper arguing NL-style ambiguity may help an LLM by matching its training distribution. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  pages        = {46--50},
+  url          = {https://conf.researchr.org/details/icfp-splash-2025/lmpl-2025-papers/7/},
+  note         = {Argues the theorem-prover surface should resemble natural-language mathematics so LLMs can co-author; NL-style ambiguity is hypothesised to help by matching the training distribution.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{kore_machine_native_2025,
-  title        = {Kore: An Argument for Machine-Native Programming Languages},
-  author       = {{Kore Authors}},
+@misc{kore_machine_native_2025,
+  title        = {Rethinking Programming Languages for {LLMs}: Building a Machine-Native Language},
+  author       = {Kore, Padmaraj},
   year         = {2025},
-  note         = {Essay on explicitly deprioritising human readability in LLM-targeted designs. Surfaced 2026-05-13. CONFIRM authorship + canonical citation.},
+  howpublished = {Medium / Coinmonks essay},
+  url          = {https://medium.com/coinmonks/rethinking-programming-languages-for-llms-building-a-machine-native-language-4acd85431381},
+  note         = {Practitioner essay arguing LLMs do not need human-oriented language features; proposes a machine-native language whose syntax and semantics are explicitly LLM-first.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{codes_mediocrity_2025,
-  title        = {Return to Mediocrity: {LLM}s Push Programming-Language Design Toward Conservative Conventions},
-  author       = {kirancodes},
+@misc{codes_mediocrity_2025,
+  title        = {Programming Language Design in the Era of {LLMs}: A Return to Mediocrity?},
+  author       = {Gopinathan, Kiran},
   year         = {2025},
-  note         = {Critical essay arguing LLMs themselves push design toward existing-human-readable conventions because that is what the training data exhibits. Surfaced 2026-05-13. CONFIRM canonical citation.},
+  howpublished = {Author's blog (kirancodes.me)},
+  url          = {https://kirancodes.me/posts/log-lang-design-llms.html},
+  note         = {Critical essay arguing LLMs push PL design toward conservative, popular syntaxes; DSL authors now face a doubled opportunity cost because their users lose LLM coverage. Author is also known as ``kirancodes'' (NUS); the seed key was kept verbatim.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{xu_llm_preferences_2025,
-  title        = {Empirical Study of {LLM} Programming-Language Preferences},
-  author       = {Xu and others},
+@misc{xu_llm_preferences_2025,
+  title        = {{LLMs} Love {Python}: A Study of {LLMs}' Bias for Programming Languages and Libraries},
+  author       = {Twist, Luke and others},
   year         = {2025},
-  note         = {Empirical complement to the codes_mediocrity_2025 essay. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  eprint       = {2503.17181},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2503.17181},
+  note         = {Eight LLMs over-pick NumPy in 48\% of cases unnecessarily; Python wins 58\% of language-choice tasks even when sub-optimal; Rust is never picked. Data: \url{https://github.com/itsluketwist/llm-code-bias}. The seed-bib key \texttt{xu\_llm\_preferences\_2025} attributed this to ``Xu and others''; the canonical first author appears to be Luke Twist. Key retained for 04/07 citation stability.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{tam_let_me_speak_2024,
-  title        = {Let Me Speak Freely? A Study on the Impact of Format Restrictions on Large Language Model Performance},
-  author       = {Tam and others},
+@inproceedings{tam_let_me_speak_2024,
+  title        = {Let Me Speak Freely? A Study on the Impact of Format Restrictions on Performance of Large Language Models},
+  author       = {Tam, Zhi Rui and Wu, Cheng-Kuang and Tsai, Yi-Lin and Lin, Chieh-Yen and Lee, Hung-yi and Chen, Yun-Nung},
+  booktitle    = {Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing ({EMNLP} 2024) --- Industry Track},
   year         = {2024},
-  note         = {Strict structured-output formats can degrade LLM reasoning quality; central counter-evidence to the SimPy-direction intuition. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+  eprint       = {2408.02442},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2408.02442},
+  note         = {Strict format constraints (JSON, regex) systematically degrade LLM reasoning; stricter formats yield bigger degradation. Central counter-evidence to the SimPy / Token Sugar direction.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{scaling_laws_code_2026,
-  title        = {Scaling Laws for Code Language Models},
-  author       = {{Anonymous}},
-  year         = {2026},
-  note         = {Predictability ordering across existing programming languages; argues language structure changes LLM scaling behaviour in measurable, predictable ways. Surfaced 2026-05-13. CONFIRM authorship + venue.},
+@misc{scaling_laws_code_2026,
+  title        = {Scaling Laws for Code: Every Programming Language Matters},
+  author       = {Yang, Jian and Guo, Shawn and Jing, Lin and Zhang, Wei and Liu, Aishan and Hao, Chuan and Li, Zhoujun and Zhao, Wayne Xin and Liu, Xianglong and Lv, Weifeng and Dai, Bryan},
+  year         = {2025},
+  eprint       = {2512.13472},
+  eprinttype   = {arXiv},
+  url          = {https://arxiv.org/abs/2512.13472},
+  note         = {Submitted 15 December 2025. More than 1000 experiments across 0.2B--14B parameters and 1T tokens; programming-language-specific scaling coefficients; learnability order roughly C\# $<$ Java $\approx$ Rust $<$ Go $<$ TS $<$ JS $<$ Python. Citation key retains the 2026 suffix for 04/07 stability; canonical preprint year is 2025.},
   keywords     = {lengua, babel}
 }
 
@@ -768,26 +854,32 @@
   keywords     = {lengua, babel}
 }
 
-@unpublished{empirical_step1_extended_2026,
-  title        = {Installment 07 Empirical Step 1 (Extended): Four-Way Verbosity Stratification},
+@misc{empirical_step1_extended_2026,
+  title        = {The Four-Way Verbosity Stratification},
   author       = {Rodriguez, Ramon},
   year         = {2026},
-  note         = {Internal research artifact; the four-way bytes/characters/morphemes/tokens-per-op dataset underlying §8 of Installment 07 and the E3 stratification in the Babel methodology paper. Stage 1 of the empirical cascade defined in 07 §7; data collected 2026-05-13.},
+  howpublished = {{RCI} research note, www.roderickc.com},
+  url          = {https://www.roderickc.com/babel/research-notes/four-way-verbosity-stratification},
+  note         = {Stage 1 of the empirical cascade defined in Installment 07 §7. Five short programs measured across three surface forms (Python, SimPy-style hand-strip, Inflexión) against six tokenizers (tiktoken's cl100k\_base and o200k\_base; Hugging Face mirrors of Llama-3, Qwen-2.5, Mistral-7B; GPT-2 for historical comparison). Drafted 2026-05-13, published as a standalone note 2026-05-16. Cited as ``Installment 07 Empirical Step 1 (Extended)'' in earlier drafts.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{babel_schema_audit_2026,
-  title        = {Babel Parameter-Schema Audit Against the 2024-2026 {LLM}-Oriented {PL} Field},
+@misc{babel_schema_audit_2026,
+  title        = {Per-Artifact Audit Table --- 51 Artifacts Across the (9+1) Axes},
   author       = {Rodriguez, Ramon},
   year         = {2026},
-  note         = {Internal research artifact; the eighteen-artifact audit that surfaced the ten schema extensions E1-E10 cited throughout the Babel methodology paper (04 §4) and Installment 07 (§6). Conducted 2026-05-13.},
+  howpublished = {{RCI} research note, www.roderickc.com},
+  url          = {https://www.roderickc.com/babel/research-notes/per-artifact-audit-table},
+  note         = {Companion to ``The Nine Design Axes --- Verified, and a Tenth (Enforcement Locus)'' (\url{https://www.roderickc.com/babel/research-notes/design-axes-verified-and-tenth}). Together these comprise the audit data that surfaced the E1--E10 schema extensions cited throughout the Babel methodology paper §4 and Installment 07 §6. Originally framed as an eighteen-artifact audit of the seed-list field; the published version extends to 51 artifacts after the 2026-05-17 lit pass. Drafted 2026-05-17.},
   keywords     = {lengua, babel}
 }
 
-@unpublished{empirical_e4_e7_e9_2026,
-  title        = {Installment 07 Schema-Extension Data Gathering: E4, E7, E9},
+@misc{design_axes_verified_2026,
+  title        = {The Nine Design Axes --- Verified, and a Tenth ({Enforcement} {Locus})},
   author       = {Rodriguez, Ramon},
   year         = {2026},
-  note         = {Internal research artifact; data-gathering pass for the set-valued enforcement-locus (E4), the n/a-deterministic-by-design split of unpredictability (E7), and the decoder-contract derivation-relation (E9). Conducted 2026-05-13.},
+  howpublished = {{RCI} research note, www.roderickc.com},
+  url          = {https://www.roderickc.com/babel/research-notes/design-axes-verified-and-tenth},
+  note         = {Companion to the [per-artifact audit table](https://www.roderickc.com/babel/research-notes/per-artifact-audit-table). Verifies the nine original design axes against the 51-artifact mid-2026 LLM-oriented PL field and surfaces the tenth axis (enforcement locus, set-valued). Also reports the structural refinements that the schema-extension data-gathering pass produced: the n/a-deterministic-by-design value of unpredictability (E7) and the decoder-contract value of derivation relation (E9). Supersedes the earlier internal-artifact key \texttt{empirical\_e4\_e7\_e9\_2026} used in pre-2026-05-20 drafts.},
   keywords     = {lengua, babel}
 }

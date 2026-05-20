@@ -1,0 +1,7 @@
+$ python3 -m babel run examples/brainfuck-rioplatense.yaml \
+    --program "[130 'más' tokens] ito decí"
+A
+
+$ python3 -m babel transpile examples/brainfuck-rioplatense.yaml \
+    --program "[130 'más' tokens] ito decí"
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++>++<[->-[>+>>]>[+[-<+>]>+>>]<<<<<]>>>[-<<<+>>>]<<<>[-]>[-]<<.

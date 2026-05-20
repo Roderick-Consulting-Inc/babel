@@ -2,6 +2,26 @@
 
 All notable changes to the Babel runtime are recorded here. Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versions follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html). The runtime is pre-1.0; the schema and API may change between minor versions.
 
+## [0.8.0] — 2026-05-20
+
+### Added
+
+- **Markdown specification-page generator (`babel.spec`)** — the third lockstep output the methodology paper has promised since the abstract. Closes the "interpreter + transpiler + spec page" target structure that §5 of `plans/04-whitepaper-babel.md` describes. Mechanical implementation:
+  - `babel.spec.render_spec(spec: LanguageSpec) -> str` returns a Markdown wiki-style page with sections for Overview, Mechanical parameters, Instruction set, Departures from the base instruction set (additions / removals), Meta-parameters, and Example programs (if the YAML carries them).
+  - New CLI subcommand `babel spec <yaml>` emits the page to stdout. Symmetric with `babel run` and `babel transpile`. No `--program` flag.
+  - Pipe characters in instruction tokens are escaped so Markdown tables don't break.
+  - Fence-info language hint on example-program code blocks comes from the YAML's `source_extension` (e.g. ```` ```bfri ```` for Brainfuck Rioplatense). Falls back to plain code if no extension is set.
+- Ten new tests in `tests/test_spec.py` covering: title and version line; presence of all mechanical axes; every instruction token rendered with backtick quoting; additions / removals / theme rendered for the Rioplatense sheet; meta-parameter values rendered when set; example programs with title / description / source / expected output; "no meta-parameters set" placeholder for empty `meta:`; "Example programs" section omitted entirely when the YAML has none; pipe-escape in tokens; end-to-end CLI smoke test.
+
+### Behaviour notes
+
+- All 193 prior tests pass unchanged. Full suite now 203 passing.
+- The generator is pure: no side effects, no filesystem access, no network. Consumes a `LanguageSpec` (or any caller's `load_spec(path)` result) and returns a string.
+
+### Paper integration
+
+- The 0.8.0 release ships alongside the v0.2.33 release of `www.roderickc.com`, which publishes a substantially revised `plans/04-whitepaper-babel.md`. The revised §7 of the methodology paper shows the actual three lockstep outputs for `examples/brainfuck-rioplatense.yaml` — interpreter run printing 'A', transpile to vanilla BF (`++++++++[>++++++++<-]>+.`), and spec page emitted by the new `babel spec` subcommand. The full generated spec page is committed alongside the paper at `generated/brainfuck-rioplatense/specification.md`; CLI session transcripts for both example programs are at `generated/brainfuck-rioplatense/example-1-print-A.txt` and `example-2-halve-and-print.txt`.
+
 ## [0.7.0] — 2026-05-17
 
 ### Added
